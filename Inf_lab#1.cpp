@@ -20,10 +20,15 @@ int input (string request_message)
 		check = true;
 		string inp_str;
 		getline(cin, inp_str);
-
-		int sp = inp_str.find(" ");
-		if (sp > 0) check &= false;
 		
+		char ch;
+		int smth = inp_str.length();
+		while (smth > 0) {
+			ch = inp_str[smth-1];
+			if (!isdigit(ch)) check &= false;
+			--smth;
+		}
+
 		bool exception_caught = false;
 		try {
 			inp = stoi(inp_str);
@@ -32,14 +37,16 @@ int input (string request_message)
 			exception_caught = true;
 			check &= false;
 		}
+		catch (const out_of_range& e) {
+			exception_caught = true;
+			check &= false;
+		}
 		if (exception_caught == false) {
 			if (inp <= 0) check &= false;
 			if (typeid(inp).name() != typeid(5).name()) check &= false;
-		}
-		
+		}		
 		if (check == true) inp_valid = true;
 		else error_message();
-
 	}
 	return inp;
 }
@@ -58,7 +65,6 @@ int main()
 {
 	int inp;
 	int modul;
-
 	bool again = true;
 	while (again == true) {
 
@@ -67,27 +73,26 @@ int main()
 
 		// Euclidean algorithm (if gcd == 1, it is possible to find the invesed element)
 
-		if (gcd(inp, modul) == true) {
-			
+		if (gcd(inp, modul) == true) {			
 			int ans = 1;
 			while ((inp * ans) % modul != 1) ++ans;
 			cout << "Result : " << ans << endl;
 		}
 		else cout << "It's impossible to calculate\n";
 		
-		string again_inp;
-		bool again_inp_check = false;
+		char again_inp;
+		bool again_correct = false;
+		cout << "Continue? (Y/N) ";
 		
-		while (again_inp_check == false) {
-			cout << "Continue? (Y/N) ";
+		while (again_correct == false) {
 			cin >> again_inp;
-			if ((again_inp == "y") or (again_inp == "Y") or (again_inp == "n") or (again_inp == "N")) {
-				if ((again_inp == "n") or (again_inp == "N")) again = false;
-				again_inp_check = true;
+			cin.ignore(numeric_limits<streamsize>::max(), '\n'); // somehow cleans buffer
+			if ((again_inp == 'y') or (again_inp == 'Y') or (again_inp == 'n') or (again_inp == 'N')) {
+				if ((again_inp == 'n') or (again_inp == 'N')) again = false;
+				again_correct = true;
 			}
 			else error_message();
 		}
-	}
-	system("pause");
+	}	
 	return 0;
 }
