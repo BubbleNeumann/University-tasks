@@ -51,20 +51,26 @@ int input (string request_message)
 	return inp;
 }
 
-bool gcd(int a, int b)
+int gcd(int a, int b, int& x, int& y)
 {
-	while (a != b) {
-		if (b > a) swap(a, b);
-		while (a > b) a -= b;
+	if (a == 0) {
+		x = 0;
+		y = 1;
+		return b;
 	}
-	if (a == 1) return true;
-	else return false;
+	int x1, y1;
+	int d = gcd(b % a, a, x1, y1);
+	x = y1 - (b / a) * x1;
+	y = x1;
+	return d;
 }
 
 int main()
 {
 	int inp;
 	int modul;
+	int x;
+	int y;
 	bool again = true;
 	while (again == true) {
 
@@ -73,10 +79,9 @@ int main()
 
 		// Euclidean algorithm (if gcd == 1, it is possible to find the invesed element)
 
-		if (gcd(inp, modul) == true) {			
-			int ans = 1;
-			while ((inp * ans) % modul != 1) ++ans;
-			cout << "Result : " << ans << endl;
+		if (gcd(inp, modul, x, y) == 1) {
+			x = (x % modul + modul) % modul;
+			cout << "Result : " << x << endl;
 		}
 		else cout << "It's impossible to calculate\n";
 		
