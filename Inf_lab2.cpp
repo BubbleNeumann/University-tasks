@@ -3,10 +3,10 @@
 #include <string>
 using namespace std;
 
-void error_message() {
+void showError() {
 	cout << "Invalid input. Try again" << endl;
 }
-string input(string &request_message)
+string getStringInput(string &request_message)
 {
 	string inp_str;
 	cout << request_message;
@@ -28,11 +28,11 @@ string input(string &request_message)
 			--smth;
 		}
 		if (check and (ch_count == 0 or ch_count == 1)) inp_valid = true;
-		else error_message();
+		else showError();
 	}
 	return inp_str;
 }
-long double convert_Ldouble(string to_process, bool &convert_suc)
+long double stringToLongDouble(string to_process)
 {
 	long double out;
 	bool check = true;
@@ -42,22 +42,21 @@ long double convert_Ldouble(string to_process, bool &convert_suc)
 	}
 	catch (const invalid_argument) {
 		exception_caught = true;
-		check &= false;
+		check = false;
 	}
 	catch (const out_of_range) {
 		exception_caught = true;
-		check &= false;
+		check = false;
 	}
 	if (exception_caught == false) if (out < 0) check = false;
 
 	if (check == true) return out;
 	else {
-		error_message();
-		convert_suc = false;
-		return 0;
+		showError();
+		throw invalid_argument("");
 	}
 }
-long double general_processing(string request_message)
+long double getLongDoubleInput(string request_message)
 {
 	long double out;
 	string inp;
@@ -65,10 +64,15 @@ long double general_processing(string request_message)
 	bool inp_valid = false;
 	bool convert_suc = true;
 	while (inp_valid == false) {
-		inp = input(request_message);
-		out = convert_Ldouble(inp, convert_suc);
+		inp = getStringInput(request_message);
+		try {
+			out = stringToLongDouble(inp);
+		}
+		catch (const invalid_argument) {
+			convert_suc = false;
+		}
 		if (convert_suc) inp_valid = true;
-		else error_message();
+		else showError();
 	}	
 	return out;
 }
@@ -76,25 +80,23 @@ long double general_processing(string request_message)
 int main()
 {
 	/*
-	Вариант 5. Приближённый корень.
-	Программа должна для заданного неотрицательного числа x вычислять элементы последовательности, первый элемент которой
-	равен x, а каждый последующий – среднему арифметическому из предыдущего элемента и отношения x к предыдущему элементу, до
-	тех пор, пока очередной элемент не станет отличаться от квадратного корня из x не более чем на заданное число.
-	
-	Входные данные : Неотрицательное дробное число x, из которого нужно извлечь корень, и положительное дробное значение точности вычислений.
-	Выходные данные : Номер первого подходящего элемента последовательности, сам этот элемент и значение модуля разности между этим
-	элементом и реальным значением корня из x.
+	Option 5. Approximate root.
+	The program must, for a given non-negative number x, calculate the elements of the sequence, the first element of which
+	equals x, and each subsequent one is the arithmetic mean of the previous element and the ratio of x to the previous element, up to
+	until the next element differs from the square root of x by no more than a given number.
+
+	Specifications Input: A non-negative fractional number x, from which you want to extract the root, and a positive fractional value of the calculation precision.
+	Output data: The number of the first matching element of the sequence, this element itself and the value of the modulus of the difference between this
+	element and real value of the root of x.
 	*/
 
 	/*
 	TO FIX:
-	 - user can enter only 1 point (add point counter to input() ), (if there are several points the programm doesn't throw an error);
+	DONE - user can enter only 1 point (add point counter to input() ), (if there are several points the programm doesn't throw an error);
 	DONE - (?) eps can't be greater than 1 (if it is not requered : remove the while cycle and defolt eps value);
-
 	---------------------------------------------------------------------
 	TO ADD:
 	 DONE - main algorithm;
-
 	*/
 
 	string inp;
@@ -103,19 +105,21 @@ int main()
 
 		long double x;
 		long double eps = 2.0;
-		x = general_processing("Enter x : ");
-		while (eps > 1) eps = general_processing("Enter the absolute error : ");
+		x = getLongDoubleInput("Enter x : ");
+		while (eps > 1) eps = getLongDoubleInput("Enter the absolute error : ");
 
 		// ------------------ MAIN ALGORITHM---------------------------
 
 		int counter = 0;
 		long double defx = x;
-		while (abs((sqrt(defx) - x)) > eps){
+		long double prev_x = x;
+		while ((prev_x - x) > eps or counter == 0){
 			++counter;
+			prev_x = x;
 			x = (x + (defx/ x)) * 0.5;
 		}
 		//cout << "\n" << sqrt(x) << endl;
-		cout << "\n#" << counter<< "\nx = " << x << "\nan absolute error = " << abs((sqrt(defx) - x));
+		cout << "\n#" << counter<< "\nx = " << x << "\nan absolute error = " << prev_x - x;
 
 		// ---------------- END OF MAIN ALGORITHM ----------------------
 
@@ -129,7 +133,7 @@ int main()
 				if ((again_inp == 'n') or (again_inp == 'N')) again = false;
 				again_correct = true;
 			}
-			else error_message();
+			else showError();
 		}
 	}
 	return 0;
