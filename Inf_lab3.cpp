@@ -12,44 +12,36 @@ int getSymbol(const string& request_message, bool ask_to_input, string& single_s
     string inp_str;
 
     cout << request_message;
-    bool inp_valid = false;
-    bool check;
-    while (!inp_valid) {
-
-        check = true;
+    while (true) {
+        bool inp_valid = true;
         if (ask_to_input) {
             getline(cin, inp_str);
-
             char ch;
             int smth = inp_str.length();
             while (smth > 0) {
                 ch = inp_str[smth - 1];
-                if (!isdigit(ch)) check = false;
+                if (!isdigit(ch)) inp_valid = false;
                 --smth;
             }
         }
         else inp_str = single_symbol;
-
-        bool exception_caught = false;
         try {
             inp = stoi(inp_str);
         }
         catch (const invalid_argument& e) {
-            exception_caught = true;
-            check = false;
+            inp_valid = false;
         }
         catch (const out_of_range& e) {
-            exception_caught = true;
-            check = false;
+            inp_valid = false;
         }
-        if (check)
-            inp_valid = true;
-        else if (!ask_to_input && check == false)
+        if (!ask_to_input && !inp_valid) {
             throw invalid_argument("");
+        }
+        else if (inp_valid)
+            return inp;
         else
             showError();
     }
-    return inp;
 }
 int countSpaces(const string& s) {
     int count = 0;
@@ -78,7 +70,12 @@ int* primal_processing(int& len, string& single_symbol)
                 single_symbol = to_process.substr(0, to_process.find(' ') + 1);
                 to_process.erase(0, to_process.find(' ') + 1);
             }
-            main[i] = getSymbol("", false, single_symbol);
+            try {
+                main[i] = getSymbol("", false, single_symbol);
+            }
+            catch (invalid_argument){
+                inp_valid = false;
+            }
             ++i;
         }
         if (!inp_valid) showError();
@@ -111,7 +108,7 @@ int main()
 
         random_device rd; //  to seed the random number generator object called mt
         mt19937 mt(rd()); // requests for random data to the operating system.
-        uniform_int_distribution<int> dist(10, 100);
+        uniform_int_distribution<int> dist(10, 99);
 
         if (hand_input) {
             for (int i = 0; i < row; ++i) {
@@ -137,9 +134,10 @@ int main()
         bool edit = binaryChoice("Do you want to edit the matrix? (Y/N)", 'y', 'n');
         int no;
         if (edit) {
+            bool if_add;
             bool if_rows = binaryChoice("Edit Rows or Columns? (R/C)", 'r', 'c');
             if (if_rows) {
-                bool if_add = binaryChoice("Add or delete one? (A/D)", 'a', 'd');
+                if_add = binaryChoice("Add or delete one? (A/D)", 'a', 'd');
                 if (if_add) {
 
                     do {
@@ -149,7 +147,7 @@ int main()
                     A = (int**) realloc(A, (row + 1) * sizeof(int));
                     ++row;
                     for (int i = row - 1; i > no; --i) {
-                            A[i] = A[i - 1];
+                        A[i] = A[i - 1];
                     }
                     cout << "\nEnter the elements of the new row separated by spaces : ";
                     A[no] = primal_processing(col, single_symbol);
@@ -161,7 +159,6 @@ int main()
                     for (int i = no - 1; i < row - 1; ++i) {
                         A[i] = A[i + 1];
                     }
-                    delete[] A[row - 1];
                     --row;
                 }
             }
@@ -178,7 +175,7 @@ int main()
                     for (int i = 0; i < row; ++i) {
                         A[i] = (int*) realloc(A[i], (col + 1) * sizeof(int));
                         for (int j = col; j > no; --j) {
-                                A[i][j] = A[i][j - 1];
+                            A[i][j] = A[i][j - 1];
                         }
                         A[i][no] = input_add[i];
                     }
@@ -204,7 +201,11 @@ int main()
                     cout << A[i][j] << " ";
                 cout << endl;
             }
-            for (int i = 0; i < row; ++i) free(A[i]);
+
+            if (!if_add && !if_rows) ++row;
+            for (int i = 0; i < row; ++i) {
+                free(A[i]);
+            }
             free(A);
         }
         again = binaryChoice("\nContinue? (Y/N)", 'y', 'n');
