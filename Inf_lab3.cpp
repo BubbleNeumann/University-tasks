@@ -51,7 +51,7 @@ int countSpaces(const string& s) {
 }
 int* primal_processing(int& len, string& single_symbol)
 {
-    int* main = (int*) malloc(len * sizeof(int));
+    int* main = (int*)malloc(len * sizeof(int));
 
     string to_process;
     bool inp_valid = false;
@@ -73,7 +73,7 @@ int* primal_processing(int& len, string& single_symbol)
             try {
                 main[i] = getSymbol("", false, single_symbol);
             }
-            catch (invalid_argument){
+            catch (invalid_argument) {
                 inp_valid = false;
             }
             ++i;
@@ -103,7 +103,7 @@ int main()
     while (again) {
         int col = getSymbol("Number of columns :", true, single_symbol);
         int row = getSymbol("Number of rows :", true, single_symbol);
-        int** A = (int**) malloc(row * sizeof(int));
+        int** A = (int**)malloc(row * sizeof(int));
         bool hand_input = binaryChoice("Hand input? (Y/N)", 'y', 'n');
 
         random_device rd; //  to seed the random number generator object called mt
@@ -118,7 +118,7 @@ int main()
         }
         else {
             for (int i = 0; i < row; ++i) {
-                A[i] = (int*) malloc(col * sizeof(int));
+                A[i] = (int*)malloc(col * sizeof(int));
                 for (int j = 0; j < col; ++j) {
                     A[i][j] = dist(mt);
                 }
@@ -144,7 +144,7 @@ int main()
                         no = getSymbol("After which row do you want to inset a new one? ", true, single_symbol);
                     } while (no < 1 || no > row);
 
-                    A = (int**) realloc(A, (row + 1) * sizeof(int));
+                    A = (int**)realloc(A, (row + 1) * sizeof(int));
                     ++row;
                     for (int i = row - 1; i > no; --i) {
                         A[i] = A[i - 1];
@@ -160,6 +160,7 @@ int main()
                         A[i] = A[i + 1];
                     }
                     --row;
+                    A = (int**)realloc(A, (row) * sizeof(int));
                 }
             }
             else {
@@ -173,7 +174,7 @@ int main()
                     int* input_add = primal_processing(row, single_symbol);
 
                     for (int i = 0; i < row; ++i) {
-                        A[i] = (int*) realloc(A[i], (col + 1) * sizeof(int));
+                        A[i] = (int*)realloc(A[i], (col + 1) * sizeof(int));
                         for (int j = col; j > no; --j) {
                             A[i][j] = A[i][j - 1];
                         }
@@ -202,7 +203,6 @@ int main()
                 cout << endl;
             }
 
-            if (!if_add && !if_rows) ++row;
             for (int i = 0; i < row; ++i) {
                 free(A[i]);
             }
