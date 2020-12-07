@@ -70,7 +70,7 @@ int getSymbol(string request_message, bool ask_to_input, string& single_symbol)
 			exception_caught = true;
 			check = false;
 		}
-		if (check == true) inp_valid = true;
+		if (check) inp_valid = true;
 		else if (ask_to_input == false and check == false) throw invalid_argument("");
 		else showError();
 	}
@@ -87,7 +87,7 @@ vector<int> primal_processing(int& len, string& single_symbol)
 	vector<int> main;
 	string to_process;
 	bool inp_valid = false;
-	while (inp_valid == false) {
+	while (!inp_valid) {
 
 		getline(cin, to_process);
 		if (countSpaces(to_process) == (len - 1)) inp_valid = true;
@@ -102,8 +102,13 @@ vector<int> primal_processing(int& len, string& single_symbol)
 				single_symbol = to_process.substr(0, to_process.find(" ") + 1);
 				to_process.erase(0, to_process.find(" ") + 1);
 			}
-			bool ex_caught = false;
-			if (ex_caught == false) main.push_back(getSymbol("", false, single_symbol));
+
+			try {
+                main.push_back(getSymbol("", false, single_symbol));
+			}
+			catch (invalid_argument){
+			    inp_valid = false;
+			}
 		}
 		if (inp_valid == false) showError();
 	}
@@ -133,16 +138,6 @@ int main()
 	
 	bool again = true;
 	while (again == true) {
-
-		/*
-		Вариант 13.
-		Сортировка слиянием.
-		Строго случайные данные и «почти отсортированные» случайные данные.
-		Входные данные: количество элементов, тип входного вектора, вектор.
-		Выходные данные:. отсортированный массив, время работы библиотечной и реализованной функций сортировок, ускорение библиотечной сортировки.
-		Должна присутствовать возможность выбора исходного вектора: вводимый с клавиатуры или генерируемый согласно варианту (два возможных для выбора
-		типа генерируемых данных);
-		*/
 
 		// ------------------ MAIN ALGORITHM---------------------------
 
