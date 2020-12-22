@@ -89,7 +89,7 @@ int main()
                         getline(file, str_to_show);
                     }
                 }
-                else cout << "problems";
+                else cout << "\nproblems. cannot open the file\n";
                 cout << str_to_show << endl;
                 file.close();
             }
@@ -126,9 +126,10 @@ int main()
                     file.close();
                     outfile.close();
                     remove(main_file_name);
-                    rename("tmp.txt", "input.txt");
+                    rename("tmp.txt", main_file_name);
+                    cout << "\nDone" << endl;
                 }
-                cout << "\nDone" << endl;
+                else cout << "\nproblems. cannot open the file\n";
             }
         } while (option != "ex");
 
