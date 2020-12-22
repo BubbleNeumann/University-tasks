@@ -16,4 +16,4 @@ Programming Methods:
 2. Sum of a number series
 3. Merge sorting
 4. String processing
-5. OOP basics
+5. OOP basics. Regular expressions
