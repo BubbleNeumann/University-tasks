@@ -4,7 +4,7 @@ Use Git just to not lose 'em.
 
 Catalog:
 
-Semester 1.
+**Semester 1.**
 
 Informatics:
 1. Extended Euclidean algorithm
@@ -19,8 +19,7 @@ Programming Methods:
 4. String processing
 5. OOP basics. Regular expressions
 
-
-Semester 2.
+**Semester 2.**
 
 Programming Languages and Data Structures:
 1. Arrays in C++
