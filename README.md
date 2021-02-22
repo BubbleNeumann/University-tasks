@@ -13,8 +13,16 @@ Informatics:
 4. Text editor. View and edit txt files 
 
 Programming Methods:
-1. Process durarion
+1. Calculate the process duration
 2. Sum of a number series
 3. Merge sorting
 4. String processing
 5. OOP basics. Regular expressions
+
+
+Semester 2.
+
+Programming Languages and Data Structures:
+1. Arrays in C++
+
+Basics of Programming Languages Translation:
