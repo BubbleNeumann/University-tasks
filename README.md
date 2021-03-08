@@ -24,3 +24,4 @@ Catalog:
 1. Arrays in C++
 
 **Basics of Programming Languages Translation:**
+1. Ways to handle text strings using (char*)
