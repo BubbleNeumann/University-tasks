@@ -22,6 +22,8 @@ Catalog:
 
 **Programming Languages and Data Structures:**
 1. Arrays in C++
+2. List sortings (quick and insertion sorts) - not optimal
 
 **Basics of Programming Languages Translation:**
 1. Ways to handle text strings using (char*)
+2. Finite automata (using state matrix)
