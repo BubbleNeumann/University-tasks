@@ -61,6 +61,7 @@ int coType(const Lex& a)
     if (!strcmp(a.body, "<>")) return co;
 
     if (!strcmp(a.body, "+") || !strcmp(a.body, "-")) return ao;
+    if (!strcmp(a.body, "*") || !strcmp(a.body, "/")) return ao;
 
     if (!strcmp(a.body, "=")) return eq;
     if (!strcmp(a.body, ";")) return sc;
@@ -104,6 +105,11 @@ void addLex(std::vector<Lex>& result, AState& state, char* lexeme)
     {
         lex.type = (LexType)coType(lex);
     }
+
+    if (state == Ef)
+    {
+        lex.type = wl;
+    }
     result.push_back(lex);
     state = S;
 }
@@ -126,7 +132,7 @@ void newLexAnalysis(std::vector<Lex>& result, char*& str)
 
         // remember the lexeme
 
-        if (state == F || state == G || state == H || state == HsA || state == HsB || state == HsC)
+        if (state == F || state == G || state == H || state == HsA || state == HsB || state == HsC || state == Ef)
         {
             char* lexeme = new char[pos - firstPos + 1];
             int t1 = firstPos;
@@ -138,8 +144,6 @@ void newLexAnalysis(std::vector<Lex>& result, char*& str)
             if (state == HsA || state == HsB || state == HsC) --pos;
             addLex(result, state, lexeme);
         }
-        if (state == Ef) state = S;
-
 
     } while (str[pos++] != '\0');
 }
