@@ -1,4 +1,4 @@
-﻿#include <iostream>
+﻿#include <iterator>
 #include <fstream>
 
 class Tree
@@ -63,12 +63,14 @@ Tree* Tree::insertLevelOrder(std::ifstream& fromf, Tree* cur, int i, int n)
         {
             cur = new Tree;
         }
+         fromf >> cur->val;
         // insert left child
         cur->left = insertLevelOrder(fromf, cur->left, 2 * i + 1, n);
+       
 
         // insert right child
         cur->right = insertLevelOrder(fromf, cur->right, 2 * i + 2, n);
-        fromf >> cur->val;
+        
 
     }
     return cur;
@@ -98,6 +100,8 @@ int main()
     std::ofstream inf("output.txt");
     autom->outprint(inf);
     inf.close();
+
+    delete autom;
 
     return 0;
 }
