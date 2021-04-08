@@ -31,4 +31,4 @@ Catalog:
 3. Lexical analyzer (using state matrix)
 
 **Homework**
-1. (April 8th) Size of a binary tree, number of leafes and nodes (everything which is not a leaf)
+1. (April 8th) Size of a binary tree, number of leafs and nodes (everything which is not a leaf)
