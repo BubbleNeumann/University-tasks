@@ -29,3 +29,6 @@ Catalog:
 1. Ways to handle text strings using (char*)
 2. Finite automata (using state matrix)
 3. Lexical analyzer (using state matrix)
+
+**Homework**
+1. (April 8th) Size of a binary tree, number of leafes and nodes (everything which is not a leaf)
