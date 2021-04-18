@@ -80,28 +80,49 @@ bool Vessel::operator <=(Vessel& another) const
 struct list
 {
     Vessel obj;
-    list* next;
+    list *next;
 };
 
-int dist(std::mt19937 engine);
+/**
+ * initialize new list of vessels with one element
+ * @param cap, cap - parameters of the first vessel
+ */
+list *init(int vol, int cap)
+{
+    list *temp = new list;
+
+    // create new Vessel object
+    temp->obj = Vessel(vol, cap);
+
+    temp->next = temp;
+    return temp;
+}
+
+/**
+ * add element to the end of the cyclic list
+ * @param head
+ * @param vol, cap - parameters of the new vessel
+ */
+void pushback(list *&head, int vol, int cap)
+{
+    list *temp = head;
+
+    // move to the end of the list
+    while (temp->next != head) temp = temp->next;
+
+    temp->next = init(vol, cap);
+    temp = temp->next;
+    temp->next = head;
+}
 
 /**
  * destructor of a list structure
  * @param head - pointer on the first element of the list
  * @param n - number of elements the list contains
  */
-void erase(list*& head, int n) {
-    for (list* tmp = head->next; --n; delete head, head = tmp, tmp = head->next);
-}
-
-// TODO rewrite for the vessels
-void print(list* head, int n) {
-    std::ofstream inf("output.txt");
-    if (inf.is_open()) {
-        inf << n << " ";
-        //for (; n--; inf << head->val << " ", head = head->next);
-        inf.close();
-    }
+void erase(list *&head, int n)
+{
+    for (list *tmp = head->next; --n; delete head, head = tmp, tmp = head->next);
 }
 
 /**
@@ -150,14 +171,19 @@ void insertionSort(list*& head, int n)
     for (int i = 0; i < n - 1; ++i) last = last->next;
 }
 
-// TODO check if list is sorted
 bool isSorted(list* head, int n)
 {
-    return false;
+    while (--n)
+    {
+        // check whether next object's value is not less than current's one
+        if (head->obj.getVolume() > head->next->obj.getVolume()) return false;
+        head = head->next;
+    }
+    return true;
 }
 
-// TODO generate list
 /**
+ * create a new list filled with random numbers
  * @param n - number of elements to randomly generate
  * @return pointer on the new list
  */
@@ -165,10 +191,27 @@ list* generateList(int n)
 {
     std::random_device rd; // to seed the random number generator object called mt
     std::mt19937 mt(rd()); // requests for random data to the operating system.
+    std::uniform_int_distribution<int> dist(1, 99);
 
     list *head = new list;
+    while (n--)
+    {
+        int vol = dist(mt);
+        pushback(head, vol, vol + dist(mt));
+    }
 
     return head;
+}
+
+void printAnswer(list *head, int n)
+{
+    std::ofstream inf("output.txt");
+    if (inf.is_open())
+    {
+        isSorted(head, n) ? inf << "sorted\n" : inf << "not sorted\n";
+        inf << n;
+        inf.close();
+    }
 }
 
 int main()
@@ -178,6 +221,13 @@ int main()
     int vessel_num;
     fromf >> vessel_num;
     fromf.close();
+
+    // create a new list
+    list *list = generateList(vessel_num);
+
+    insertionSort(list, vessel_num);
+    printAnswer(list, vessel_num);
+    erase(list, vessel_num);
 
     return 0;
 }
