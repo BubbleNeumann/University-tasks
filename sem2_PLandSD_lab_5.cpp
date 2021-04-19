@@ -22,12 +22,6 @@ public:
     Vessel(int, int);
 
     unsigned int getVolume() const;
-
-    // logical operations overloading
-    bool operator >(Vessel&) const;
-    bool operator >=(Vessel&) const;
-    bool operator <(Vessel&) const;
-    bool operator <=(Vessel&) const;
 };
 
 Vessel::Vessel(int vol, int cap)
@@ -41,42 +35,6 @@ unsigned int Vessel::getVolume() const
     return volume;
 }
 
-bool Vessel::operator >(Vessel& another) const
-{
-    if (capacity <= another.capacity)
-    {
-        if (volume <= another.volume) return false;
-    }
-    return true;
-}
-
-bool Vessel::operator >=(Vessel& another) const
-{
-    if (capacity < another.capacity)
-    {
-        if (volume < another.volume) return false;
-    }
-    return true;
-}
-
-bool Vessel::operator <(Vessel& another) const
-{
-    if (capacity >= another.capacity)
-    {
-        if (volume >= another.volume) return false;
-    }
-    return true;
-}
-
-bool Vessel::operator <=(Vessel& another) const
-{
-    if (capacity > another.capacity)
-    {
-        if (volume > another.volume) return false;
-    }
-    return true;
-}
-
 struct list
 {
     Vessel obj;
@@ -85,7 +43,7 @@ struct list
 
 /**
  * initialize new list of vessels with one element
- * @param cap, cap - parameters of the first vessel
+ * @param vol, cap - parameters of the first vessel
  */
 list *init(int vol, int cap)
 {
@@ -107,12 +65,17 @@ void pushback(list *&head, int vol, int cap)
 {
     list *temp = head;
 
-    // move to the end of the list
-    while (temp->next != head) temp = temp->next;
+    // initialize list if it's empty
+    if (!head) head = init(vol, cap);
+    else
+    {
+        // move to the end of the list
+        while (temp->next != head) temp = temp->next;
 
-    temp->next = init(vol, cap);
-    temp = temp->next;
-    temp->next = head;
+        temp->next = init(vol, cap);
+        temp = temp->next;
+        temp->next = head;
+    }
 }
 
 /**
@@ -132,21 +95,21 @@ void erase(list *&head, int n)
  * @param j - second elment
  * @return new list with
  */
-list* swap(list* head, int i, int j) {
-    if (i > 0 || j > 0 || i == j) return head;
+void swap(list *head, int i, int j)
+{
+    if (i == j) return;
     if (j < i) std::swap(i, j);
-    list** i_ptr = &head;
-    for (; *i_ptr && i > 0; --i, i_ptr = &(*i_ptr)->next, --j);
-    list** j_ptr = i_ptr;
-    for (; *j_ptr && j > 0; --j) j_ptr = &(*j_ptr)->next;
-    if (*i_ptr && *j_ptr) {
+    list **i_ptr = &head;
+    for (; *i_ptr && i--; i_ptr = &(*i_ptr)->next, --j);
+    list **j_ptr = i_ptr;
+    for (; *j_ptr && j--; j_ptr = &(*j_ptr)->next);
+    if (*i_ptr && *j_ptr)
+    {
         std::swap(*i_ptr, *j_ptr);
         std::swap((*i_ptr)->next, (*j_ptr)->next);
     }
-    return head;
 }
 
-// TODO optimise list walkthrough
 void insertionSort(list*& head, int n)
 {
     list* temp;
@@ -160,15 +123,12 @@ void insertionSort(list*& head, int n)
         for (int i = 0 ; i < j; ++i, temp = temp->next);
         while (0 <= j && t < temp->obj.getVolume())
         {
-            head = swap(head, j + 1, j);
+            swap(head, j + 1, j);
             --j;
             temp = head;
-            for (int i = 0; i < j; ++i)
-                temp = temp->next;
+            for (int i = 0; i < j; ++i) temp = temp->next;
         }
     }
-    list* last = head;
-    for (int i = 0; i < n - 1; ++i) last = last->next;
 }
 
 bool isSorted(list* head, int n)
@@ -199,7 +159,6 @@ list* generateList(int n)
         int vol = dist(mt);
         pushback(head, vol, vol + dist(mt));
     }
-
     return head;
 }
 
@@ -218,16 +177,16 @@ int main()
 {
     // read the number of list elements from file
     std::ifstream fromf("input.txt");
-    int vessel_num;
-    fromf >> vessel_num;
+    int elem_num;
+    fromf >> elem_num;
     fromf.close();
 
     // create a new list
-    list *list = generateList(vessel_num);
+    list *list = generateList(elem_num);
 
-    insertionSort(list, vessel_num);
-    printAnswer(list, vessel_num);
-    erase(list, vessel_num);
+    insertionSort(list, elem_num);
+    printAnswer(list, elem_num);
+    erase(list, elem_num);
 
     return 0;
 }
