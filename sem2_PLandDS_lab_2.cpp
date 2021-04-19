@@ -28,7 +28,7 @@ list* getElem(int x, list* head) {
 }
 
 list* swap(list* head, int i, int j) {
-	if (i > 0 || j > 0 || i == j) return head;
+	if (i == j) return head;
 	if (j < i) std::swap(i, j);
 	list** i_ptr = &head;
 	for (; *i_ptr && i > 0; --i, i_ptr = &(*i_ptr)->next, --j);
@@ -102,8 +102,6 @@ void insertionSort(list*& head, int n) {
 				temp = temp->next;
 		}
 	}
-	list* last = head;
-	for (int i = 0; i < n - 1; ++i) last = last->next;
 }
 
 void print(list* head, int n) {
