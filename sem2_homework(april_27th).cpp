@@ -38,13 +38,13 @@ public:
 		vect<type> V(n + n1); 
 		int cn = n;
 		int dn = n1;
-    	for (; n; *(V.p + n) = *(p + n), n--);
+    		for (; n; *(V.p + n) = *(p + n), n--);
 		for (; n1; *(V.p + cn + n1) = *(arr.p + n1), n1--);
 
 		std::cout << '\n';
 		for (int i = 0; i++ < (cn+dn); std::cout << V.p[i] << " ");
 		std::swap(p, V.p);
-		std::swap(arr.end, V.end);
+		std::swap(end, V.end);
 
 		return V;
 	}
