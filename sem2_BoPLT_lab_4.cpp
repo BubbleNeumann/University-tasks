@@ -16,12 +16,12 @@
  */
 enum AState { S, A, B, C, E, M, F, G, H, Ef, Hs, HsA, HsB, HsC };
 
-const char lex_name[14][3]{ "if", "th", "ei", "en", "no", "vl",
-        "lo", "co", "ao", "id", "eq", "sc", "wl" };
+const char lex_name[14][3]{ "if", "th", "ei", "en", "vl",
+        "lo", "co", "ao", "id", "no", "eq", "sc", "wl" };
 
 // idC - for condition statement
 // idO - for arithmetical exptession
-enum LexType { IF, TH, EI, EN, NO, vl, lo, co, ao, id, eq, sc, wl, Er, L, idC, idO, idE};
+enum LexType { IF, TH, EI, EN, vl, lo, co, ao, id, NO, eq, sc, wl, idC, idO, idE, L, Er};
 
 
 const AState st[6][6]
@@ -35,22 +35,22 @@ const AState st[6][6]
       {M, HsA, HsB, HsC, Ef, M} // special separator which could be paired
 };
 
-const LexType type[12][16]
+const LexType type[12][17]
 {
   // the previous lexeme type:
-  // L, IF, TH, EI, EN, NO, vl, lo, co, ao, id, eq, sc, idC, idO, idE
-    {IF,Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er}, // IF
-    {Er,Er, Er, Er, Er, Er, Er, Er, Er, Er, TH, Er, Er, TH, Er, Er}, // TH
-    {Er,Er, Er, Er, Er, Er, Er, Er, Er, Er, EI, Er, Er, Er, EI, Er}, // EI
-    {Er,Er, Er, Er, Er, Er, EN, Er, Er, Er, EN, Er, Er, Er, EN, Er}, // EN
-    {Er,NO, Er, NO, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er}, // NO
-    {Er,Er, Er, Er, Er, Er, Er, Er, vl, vl, Er, vl, Er, Er, Er, Er}, // vl
-    {Er,Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, lo, Er, Er}, // lo
-    {Er,Er, Er, Er, Er, Er, Er, Er, Er, Er, co, Er, Er, co, Er, Er}, // co
-    {Er,Er, Er, Er, Er, Er, ao, Er, Er, Er, Er, Er, Er, Er, ao, Er}, // ao
-    {Er,idC,idE,idC,Er, idC,Er, idC,id, id, Er, idO,Er, Er, Er, idO}, // id
-    {Er,Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, eq}, // eq
-    {Er,Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er}  // sc
+  // IF, TH, EI, EN, vl, lo, co, ao, id,  NO, eq, sc, wl, idC, idO, idE, L
+    {Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, IF}, // IF
+    {Er, Er, Er, Er, TH, Er, Er, Er, TH, Er, Er, Er, Er, TH, Er, Er, Er}, // TH
+    {Er, Er, Er, Er, EI, Er, Er, Er, EI, Er, Er, Er, Er, Er, EI, Er, Er}, // EI
+    {Er, Er, Er, Er, EN, Er, Er, Er, EN, Er, Er, Er, Er, Er, EN, Er, Er}, // EN
+    {vl, Er, Er, Er, Er, Er, vl, vl, Er, Er, vl, Er, Er, Er, Er, Er, Er}, // vl
+    {Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, lo, Er, Er, Er}, // lo
+    {Er, Er, Er, Er, Er, Er, Er, Er, co, Er, Er, Er, Er, co, Er, Er, Er}, // co
+    {Er, Er, Er, Er, ao, Er, Er, Er, Er, Er, Er, Er, Er, Er, ao, Er, Er}, // ao
+    {idC,idE,idC,Er, Er, idC,id, id, Er, idC,idO,idE, Er, Er, Er,idO, Er}, // id
+    {NO, Er, NO, Er, Er, NO, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er}, // NO
+    {Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, Er, eq, Er}, // eq
+    {Er, Er, Er, Er, Er, Er, Er, Er, sc, Er, Er, Er, Er, Er, Er, Er, Er}  // sc
 };
 
 int getPath(char curr, char first)
@@ -80,7 +80,8 @@ int wordType(const Lex& a)
     if (!strcmp(a.body, "not")) return NO;
     if (!strcmp(a.body, "and") || !strcmp(a.body, "or")) return lo;
 
-    return id;
+    if (sizeof a.body/sizeof a.body[0] < 5) return id;
+    return wl;
 }
 
 // called for the lexemes which consist of special characters
@@ -172,30 +173,43 @@ void lexAnalysis(std::vector<Lex>& result, char*& str)
     } while (str[pos++] != '\0');
 }
 
-// th efunction
+
+
+// the function
 void syntaxAnalysis(std::vector<Lex>& vect, std::ofstream& inf)
 {
+    // check if the vector is empty
+    if (!vect.size()) { inf << "\n0 if"; return; }
 
     // the beginning of the construction
     LexType state = L;
+    LexType prev_state;
 
-    // size_t: alias of unsigned integer type
-    for (size_t i = 0; i < vect.size(); ++i)
+    for (unsigned int i = 0; i < vect.size(); ++i)
     {
-        if (vect[i].type != wl) state = type[vect[i].type][state];
+        prev_state = state;
+        state = type[vect[i].type][state];
         
         if (state == Er || vect[i].type == wl)
         {
-            
-        }
-        else if (state == EN)
-        {
-            if (i == vect.size() - 1) inf << "\nOK";
-            else state = L;
-        }
+            // find a lexeme which would be suitable
+            int j = 0;
+            LexType find_state = type[j][prev_state];
+            for (; type[find_state][prev_state] == Er;)
+            {
+                find_state = type[(++j)%17][prev_state];
+                if (find_state == idC || find_state == idO || find_state == idE)
+                {
+                    find_state = id; break;
+                }
+            }            
 
+            // print the second row of the answer
+            inf << std::endl << i << " " << lex_name[find_state];
+            return;
+        }
+        else if (state == EN && i == vect.size() - 1) inf << "\nOK";
     }
-
 }
 
 // read the content of the .txt file 
@@ -227,7 +241,7 @@ char* getSymbols()
 
 void printLexemeList(std::vector<Lex>& v, std::ofstream& inf)
 {
-    for (size_t i = 0; i < v.size(); ++i) 
+    for (unsigned int i = 0; i < v.size(); ++i)
     {
         inf << v[i].body << '[' << lex_name[v[i].type] << ']' << ' ';
     }
