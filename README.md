@@ -36,6 +36,10 @@ Catalog:
 
 ## Semester 3.
 
-**Python for scientific problem solving**
+**Python for scientific problem solving - Labs**
+1. Fibonacci sequence
 
 **Object Oriented Programming (Java)**
+1. Packages and archives
+2. Basic language constructions
+3. Exceptions and interfaces
