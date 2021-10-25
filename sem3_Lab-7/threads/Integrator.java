@@ -7,12 +7,11 @@ public class Integrator extends Thread {
 
     private Task task;
     private Switcher switcher;
-    private boolean running;
+    private boolean running = false;
 
     public Integrator(Task task, Switcher switcher) {
         this.task = task;
         this.switcher = switcher;
-        running = false;
     }
 
     @Override
@@ -28,11 +27,10 @@ public class Integrator extends Thread {
 
                 switcher.endRead();
 
-            } catch (InterruptedException e) {
-                System.out.println("Интегратор прервали во время сна, он корректно завершил свою работу");
-
             } catch (IllegalStateException | InappropriateFunctionPointException e) {
                 e.printStackTrace();
+            } catch (InterruptedException e) {
+                System.out.println("Thread was correctly interrupted");
             }
         }
     }

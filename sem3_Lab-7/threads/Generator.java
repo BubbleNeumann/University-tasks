@@ -29,10 +29,8 @@ public class Generator extends Thread {
                 System.out.println("Source leftX = " + task.getLeftX() + " rightX = " + task.getRightX() + " step = "
                         + task.getStep());
 
-            } catch (InterruptedException ex) {
-
-                System.out.println();
-
+            } catch (InterruptedException e) {
+                System.out.println("Thread was correctly interrupted");
             }
         }
     }
