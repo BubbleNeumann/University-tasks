@@ -164,7 +164,7 @@ public class ArrayTabulatedFunction implements TabulatedFunction, Externalizable
 
         list[arrayLength++] = new FunctionPoint();
         list[arrayLength - 1] = point;
-        arrayLength++;
+        // arrayLength++;
     }
 
     @Override
@@ -179,6 +179,25 @@ public class ArrayTabulatedFunction implements TabulatedFunction, Externalizable
         this.list = newList;
         this.arrayLength++;
     }
+
+    // public void addElem(FunctionPoint point) {
+    // for (int i = 0; i < arrayLength; i++) {
+    // if (list[i].getX() < point.getX() + 0.01 && list[i].getX() > point.getX() -
+    // 0.01) {
+    // throw new InappropriateFunctionPointException("this x already exists");
+    // }
+    // }
+
+    // // while ()
+
+    // FunctionPoint newList[] = new FunctionPoint[this.list.length + 1];
+    // System.arraycopy(this.list, 0, newList, 0, index);
+    // newList[index] = new FunctionPoint();
+    // System.arraycopy(this.list, index + 1, newList, index + 1, this.arrayLength -
+    // index);
+    // this.list = newList;
+    // this.arrayLength++;
+    // }
 
     /**
      * @param out

@@ -1,15 +1,22 @@
 package doc;
 
-import functions.*;
-
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.function.Function;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import root.*;
+import functions.ArrayTabulatedFunction;
+import functions.FunctionPoint;
+import functions.FunctionPointIndexOutOfBoundsException;
+import functions.InappropriateFunctionPointException;
+import functions.TabulatedFunction;
+import functions.TabulatedFunctions;
 
 public class TabulatedFunctionDoc implements TabulatedFunction {
 
@@ -18,6 +25,7 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
     private boolean unsavedChanges;
     private boolean modified;
     private boolean fileNameAssigned;
+    private MainframeController controller;
 
     public TabulatedFunctionDoc() {
         this.function = new ArrayTabulatedFunction();
@@ -75,23 +83,35 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
         return fileNameAssigned;
     }
 
+    /**
+     * replace a tabulated function object with a new one with given parameters
+     * 
+     * @param leftX
+     * @param rightX
+     * @param pointsCount
+     */
     public void newFunction(double leftX, double rightX, int pointsCount) {
-
         function = new ArrayTabulatedFunction(leftX, rightX, pointsCount);
-        // if (fileName == "ArrayTabulatedFunction") {
-        // function = new ArrayTabulatedFunction(leftX, rightX, pointsCount);
-        // } else if (fileName == "LinkedListTabulatedFunction") {
-        // function = new LinkedListTabulatedFunction(leftX, rightX, pointsCount);
-        // }
+        this.callRedraw();
     }
 
+    /**
+     * tabulates a given function, i.e. splits the function on pieces
+     * 
+     * @param func
+     * @param leftX
+     * @param rightX
+     * @param pointsCount
+     * @return TabulatedFunction
+     * @throws IllegalArgumentException
+     * @throws InappropriateFunctionPointException
+     */
     public TabulatedFunction tabulateFunction(Function func, double leftX, double rightX, int pointsCount)
             throws IllegalArgumentException, InappropriateFunctionPointException {
-        return TabulatedFunctions.tabulate(func, leftX, rightX, pointsCount);
+        return TabulatedFunctions.tabulate((Function) func, leftX, rightX, pointsCount);
     }
 
     public void saveFunctionAs(String fileName) {
-
         JSONObject pointsCount = new JSONObject();
         pointsCount.put("pointsCount", function.getStructureLength());
 
@@ -112,9 +132,14 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * get the function from json file fills the 'pointsCount' parameter and creates
+     * a new TabulatedFunction
+     * 
+     * @param fileName
+     */
     public void loadFunction(String fileName) {
         JSONParser parser = new JSONParser();
 
@@ -133,7 +158,6 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
                 double y = (double) point.get("y");
 
                 points[index++] = new FunctionPoint(x, y);
-
             }
 
             function = new ArrayTabulatedFunction(points);
@@ -141,6 +165,8 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
         } catch (IOException | ParseException e) {
             System.out.println(e.toString());
         }
+
+        this.callRedraw();
 
     }
 
@@ -174,6 +200,7 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
         unsavedChanges = true;
         modified = true;
         function.setPointX(index, x);
+        this.callRedraw();
     }
 
     @Override
@@ -186,6 +213,7 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
         unsavedChanges = true;
         modified = true;
         function.setPointY(index, y);
+        this.callRedraw();
     }
 
     @Override
@@ -198,6 +226,7 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
         unsavedChanges = true;
         modified = true;
         function.addElemToTail(point);
+        this.callRedraw();
     }
 
     @Override
@@ -205,6 +234,7 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
         unsavedChanges = true;
         modified = true;
         function.addElemByIndex(index);
+        this.callRedraw();
     }
 
     @Override
@@ -212,6 +242,9 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
         unsavedChanges = true;
         modified = true;
         function.deleteElemByIndex(index);
+
+        // since the function was modified
+        this.callRedraw();
     }
 
     @Override
@@ -222,6 +255,19 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
     @Override
     public FunctionPoint getPoint(int index) {
         return function.getPoint(index);
+    }
+
+    @Override
+    public String toString() {
+        return this.function.toString();
+    }
+
+    public void registerRedrawFunctionController(MainframeController ctrl) {
+        controller = ctrl;
+    }
+
+    public void callRedraw() {
+        controller.redraw();
     }
 
 }

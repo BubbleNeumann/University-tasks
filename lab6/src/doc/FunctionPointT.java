@@ -2,12 +2,12 @@ package doc;
 
 public class FunctionPointT {
 
+    private Double x, y;
+
     public FunctionPointT(Double x, Double y) {
         this.x = x;
         this.y = y;
     }
-
-    private Double x, y;
 
     public Double getX() {
         return x;
