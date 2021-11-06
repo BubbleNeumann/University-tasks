@@ -1,5 +1,6 @@
 package root;
 
+import java.awt.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -10,6 +11,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import doc.FunctionPointT;
 import functions.FunctionPoint;
 import functions.InappropriateFunctionPointException;
@@ -49,6 +52,8 @@ public class MainframeController {
         for (int i = 0; i < App.tabDoc.getStructureLength(); i++)
             table.getItems().add(i, new FunctionPointT(App.tabDoc.getPoint(i).getX(), App.tabDoc.getPoint(i).getY()));
 
+        edX.setText("0");
+        edY.setText("0");
         funcPtrCount.setText(String.valueOf(App.tabDoc.getStructureLength()));
     }
 
@@ -76,6 +81,26 @@ public class MainframeController {
     private void btnDeleteClick(ActionEvent event) {
         int rowIndex = table.getSelectionModel().getSelectedIndex();
         App.tabDoc.deleteElemByIndex(rowIndex);
+    }
+
+    @FXML
+    private void mouseClickOnTable() {
+        // System.out.println("clicked");
+        labelRedraw();
+    }
+
+    // TODO finish for keyboard events
+    @FXML
+    private void keyTyped(KeyEvent event) {
+        // KeyCode key = event.getCode(); // Keyboard code for the pressed key
+        // if (key == KeyEvent.VK_UP) {
+        // System.out.println("clicked");
+        // }
+    }
+
+    private void labelRedraw() {
+        funcPtrCount.setText("Point " + String.valueOf(table.getSelectionModel().getSelectedIndex() + 1) + " of "
+                + String.valueOf(App.tabDoc.getStructureLength()));
     }
 
     public void redraw() {

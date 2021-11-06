@@ -92,7 +92,7 @@
             <Font size="18.0" />
           </font>
         </Label>
-            <TableView fx:id="table" editable="true" layoutX="14.0" layoutY="33.0" prefHeight="235.0" prefWidth="612.0" />
+            <TableView fx:id="table" editable="true" layoutX="14.0" layoutY="33.0" onKeyPressed="#keyPressed" onKeyTyped="#keyTyped" onMouseClicked="#mouseClickOnTable" prefHeight="235.0" prefWidth="612.0" />
             <TextField id="edX" fx:id="edX" layoutX="136.0" layoutY="282.0" />
             <TextField id="edY" fx:id="edY" layoutX="136.0" layoutY="318.0" />
             <Label layoutX="53.0" layoutY="286.0" prefHeight="17.0" prefWidth="77.0" text="New point X:" />
