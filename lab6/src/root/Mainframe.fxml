@@ -50,37 +50,18 @@
       <menus>
         <Menu mnemonicParsing="false" text="File">
           <items>
-            <MenuItem mnemonicParsing="false" text="New" />
-            <MenuItem mnemonicParsing="false" text="Open…" />
-            <Menu mnemonicParsing="false" text="Open Recent" />
+            <MenuItem mnemonicParsing="false" text="New" onAction="#newFunction"/>
+            <MenuItem mnemonicParsing="false" text="Open…" onAction="#openFunctionFromFile"/>
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Close" />
-            <MenuItem mnemonicParsing="false" text="Save" />
+            <MenuItem mnemonicParsing="false" text="Save" onAction="#saveFunctionInDefaultFile"/>
             <MenuItem mnemonicParsing="false" text="Save As…" />
-            <MenuItem mnemonicParsing="false" text="Revert" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Preferences…" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Quit" />
+            <MenuItem mnemonicParsing="false" text="Quit" onAction="#quit"/>
           </items>
         </Menu>
-        <Menu mnemonicParsing="false" text="Edit">
+        <Menu mnemonicParsing="false" text="Tabulate">
           <items>
-            <MenuItem mnemonicParsing="false" text="Undo" />
-            <MenuItem mnemonicParsing="false" text="Redo" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Cut" />
-            <MenuItem mnemonicParsing="false" text="Copy" />
-            <MenuItem mnemonicParsing="false" text="Paste" />
-            <MenuItem mnemonicParsing="false" text="Delete" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Select All" />
-            <MenuItem mnemonicParsing="false" text="Unselect All" />
-          </items>
-        </Menu>
-        <Menu mnemonicParsing="false" text="Help">
-          <items>
-            <MenuItem mnemonicParsing="false" text="About MyHelloApp" />
+            <MenuItem mnemonicParsing="false" text="Tabulate function" onAction="#tabulate"/>
           </items>
         </Menu>
       </menus>
@@ -92,7 +73,7 @@
             <Font size="18.0" />
           </font>
         </Label>
-            <TableView fx:id="table" editable="true" layoutX="14.0" layoutY="33.0" onKeyPressed="#keyPressed" onKeyTyped="#keyTyped" onMouseClicked="#mouseClickOnTable" prefHeight="235.0" prefWidth="612.0" />
+            <TableView fx:id="table" editable="true" layoutX="14.0" layoutY="33.0" onKeyTyped="#keyTyped" onMouseClicked="#mouseClickOnTable" prefHeight="235.0" prefWidth="612.0" />
             <TextField id="edX" fx:id="edX" layoutX="136.0" layoutY="282.0" />
             <TextField id="edY" fx:id="edY" layoutX="136.0" layoutY="318.0" />
             <Label layoutX="53.0" layoutY="286.0" prefHeight="17.0" prefWidth="77.0" text="New point X:" />

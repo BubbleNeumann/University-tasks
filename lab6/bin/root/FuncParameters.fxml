@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="230.0" prefWidth="390.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="root.FuncParametersController">
+   <children>
+      <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+         <Button fx:id="btnOK" layoutX="255.0" layoutY="184.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="110.0" style="-fx-background-color: #7ee691;" text="OK" onAction="#btnOKClick"/>
+         <Button fx:id="closeButton" layoutX="128.0" layoutY="184.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="110.0" style="-fx-background-color: #ff7575;" text="Cancel" onAction="#btnCancelClick"/>
+         <Label layoutX="33.0" layoutY="50.0" prefHeight="26.0" prefWidth="131.0" text="Left domain border" />
+         <Label layoutX="33.0" layoutY="82.0" prefHeight="26.0" prefWidth="131.0" text="Right domain border" />
+         <Label layoutX="33.0" layoutY="115.0" prefHeight="26.0" prefWidth="131.0" text="Points count" />
+         <TextField fx:id="edLeftDomainBorder" layoutX="215.0" layoutY="50.0" />
+         <TextField fx:id="edRightDomainBorder" layoutX="215.0" layoutY="82.0" />
+         <Spinner layoutX="215.0" layoutY="112.0" fx:id="spinner" min="3" max = "11"/>
+      </AnchorPane>
+   </children>
+</VBox>

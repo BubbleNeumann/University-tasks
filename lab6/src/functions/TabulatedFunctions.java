@@ -7,23 +7,22 @@ public class TabulatedFunctions {
     private TabulatedFunctions() {
     }
 
-    public static TabulatedFunction tabulate(java.util.function.Function func, double leftX, double rightX,
-            int pointsCount) throws InappropriateFunctionPointException, IllegalArgumentException {
+    public static TabulatedFunction tabulate(Function func, double leftX, double rightX, int pointsCount)
+            throws InappropriateFunctionPointException, IllegalArgumentException {
 
-        if (leftX < ((Function) func).getLeftDomainBorder() || rightX > ((Function) func).getRightDomainBorder()) {
+        if (leftX < func.getLeftDomainBorder() || rightX > func.getRightDomainBorder()) {
             throw new IllegalArgumentException();
         }
 
         FunctionPoint[] points = new FunctionPoint[pointsCount];
-        points[0] = new FunctionPoint(leftX, ((Function) func).getFunctionValue(leftX));
+        points[0] = new FunctionPoint(leftX, func.getFunctionValue(leftX));
 
         double iterationStep = (rightX - leftX) / (pointsCount - 1);
 
         for (int i = 1; i < pointsCount; i++) {
             points[i] = new FunctionPoint(points[i - 1].getX() + iterationStep,
-                    ((Function) func).getFunctionValue(points[i - 1].getX() + iterationStep));
+                    func.getFunctionValue(points[i - 1].getX() + iterationStep));
         }
-
         return new ArrayTabulatedFunction(points);
     }
 

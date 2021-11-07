@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 public class App extends Application {
 
     public static TabulatedFunctionDoc tabDoc;
+    public static Stage primaryStage;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -26,10 +27,8 @@ public class App extends Application {
             MainframeController ctrl = fxmlLoader.getController();
             tabDoc.registerRedrawFunctionController(ctrl);
 
-            Scene scene = new Scene(root);
-
             primaryStage.setTitle("Tabulated functions");
-            primaryStage.setScene(scene);
+            primaryStage.setScene(new Scene(root));
             primaryStage.show();
 
         } catch (Exception e) {

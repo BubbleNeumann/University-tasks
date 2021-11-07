@@ -19,5 +19,6 @@
         "exclude": [
             "c:\\Users\\bubbl\\Downloads\\java-json.jar\\java-json.jar"
         ]
-    }
+    },
+    "java.codeGeneration.generateComments": true
 }

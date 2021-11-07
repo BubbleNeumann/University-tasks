@@ -3,7 +3,6 @@ package doc;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.function.Function;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -17,6 +16,7 @@ import functions.FunctionPointIndexOutOfBoundsException;
 import functions.InappropriateFunctionPointException;
 import functions.TabulatedFunction;
 import functions.TabulatedFunctions;
+import functions.Function;
 
 public class TabulatedFunctionDoc implements TabulatedFunction {
 
@@ -98,7 +98,7 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
     /**
      * tabulates a given function, i.e. splits the function on pieces
      * 
-     * @param func
+     * @param f
      * @param leftX
      * @param rightX
      * @param pointsCount
@@ -106,14 +106,16 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
      * @throws IllegalArgumentException
      * @throws InappropriateFunctionPointException
      */
-    public TabulatedFunction tabulateFunction(Function func, double leftX, double rightX, int pointsCount)
+    public TabulatedFunction tabulateFunction(Function f, double leftX, double rightX, int pointsCount)
             throws IllegalArgumentException, InappropriateFunctionPointException {
-        return TabulatedFunctions.tabulate((Function) func, leftX, rightX, pointsCount);
+        this.function = TabulatedFunctions.tabulate(f, leftX, rightX, pointsCount);
+        return TabulatedFunctions.tabulate(f, leftX, rightX, pointsCount);
     }
 
     public void saveFunctionAs(String fileName) {
-        JSONObject pointsCount = new JSONObject();
-        pointsCount.put("pointsCount", function.getStructureLength());
+        JSONObject outer = new JSONObject();
+        // JSONObject pointsCount = new JSONObject();
+        // pointsCount.put("pointsCount", function.getStructureLength());
 
         JSONArray points = new JSONArray();
 
@@ -124,8 +126,11 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
             points.add(point);
         }
 
+        outer.put("pointsCount", function.getStructureLength());
+        outer.put("points", points);
+
         try (FileWriter file = new FileWriter(fileName)) {
-            file.write(points.toJSONString());
+            file.write(outer.toJSONString());
             file.flush();
             unsavedChanges = false;
 
