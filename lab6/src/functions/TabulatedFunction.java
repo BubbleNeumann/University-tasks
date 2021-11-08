@@ -16,7 +16,7 @@ public interface TabulatedFunction extends Function, Cloneable {
 
     void addElemToTail(FunctionPoint point) throws InappropriateFunctionPointException;
 
-    void addElemByIndex(int index);
+    void addElemByIndex(int index, FunctionPoint point);
 
     void deleteElemByIndex(int index) throws FunctionPointIndexOutOfBoundsException;
 

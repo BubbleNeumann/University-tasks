@@ -235,10 +235,10 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
     }
 
     @Override
-    public void addElemByIndex(int index) {
+    public void addElemByIndex(int index, FunctionPoint point) {
         unsavedChanges = true;
         modified = true;
-        function.addElemByIndex(index);
+        function.addElemByIndex(index, point);
         this.callRedraw();
     }
 

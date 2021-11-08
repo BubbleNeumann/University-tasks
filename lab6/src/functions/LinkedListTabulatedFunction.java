@@ -17,6 +17,12 @@ public class LinkedListTabulatedFunction implements TabulatedFunction, Externali
             prev = null;
         }
 
+        public FunctionNode(FunctionPoint point2) {
+            point = point;
+            next = null;
+            prev = null;
+        }
+
         @Override
         public void writeExternal(ObjectOutput out) throws IOException {
             out.writeObject(point);
@@ -154,7 +160,7 @@ public class LinkedListTabulatedFunction implements TabulatedFunction, Externali
     }
 
     @Override
-    public void addElemByIndex(int index) throws FunctionPointIndexOutOfBoundsException {
+    public void addElemByIndex(int index, FunctionPoint point) throws FunctionPointIndexOutOfBoundsException {
         if (index >= length)
             throw new FunctionPointIndexOutOfBoundsException("index is greater than length");
 
@@ -167,7 +173,7 @@ public class LinkedListTabulatedFunction implements TabulatedFunction, Externali
         }
 
         // if no exception is thrown, add a new function node
-        FunctionNode newNode = new FunctionNode();
+        FunctionNode newNode = new FunctionNode(point);
         newNode.next = cur.next;
         newNode.prev = cur;
         cur.next = newNode;

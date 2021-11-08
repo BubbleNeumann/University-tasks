@@ -17,7 +17,7 @@
          <Label layoutX="33.0" layoutY="115.0" prefHeight="26.0" prefWidth="131.0" text="Points count" />
          <TextField fx:id="edLeftDomainBorder" layoutX="215.0" layoutY="50.0" />
          <TextField fx:id="edRightDomainBorder" layoutX="215.0" layoutY="82.0" />
-         <Spinner layoutX="215.0" layoutY="112.0" fx:id="spinner" min="3" max = "11"/>
+         <Spinner layoutX="215.0" layoutY="112.0" fx:id="spinner" min="3" max = "20"/>
       </AnchorPane>
    </children>
 </VBox>

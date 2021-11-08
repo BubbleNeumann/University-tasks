@@ -32,7 +32,7 @@ public class FuncParametersController {
     void initialize() {
         this.edLeftDomainBorder.setText("0");
         this.edRightDomainBorder.setText("10");
-        // this.spinner.setI(11);
+        this.spinner.getValueFactory().setValue(11);
     }
 
     @FXML

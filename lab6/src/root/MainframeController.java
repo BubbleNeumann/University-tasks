@@ -21,6 +21,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -75,32 +76,50 @@ public class MainframeController {
     }
 
     /**
-     * called when the "Add point" button is clicked
+     * Called when the "Add point" button is clicked. Inserts a new point to the
+     * proper position, so the table elements remain sorted.
      * 
      * @param event
      */
     @FXML
     private void btnNewClick(ActionEvent event) {
         try {
-            App.tabDoc.addElemToTail(
-                    new FunctionPoint(Double.parseDouble(edX.getText()), Double.parseDouble(edY.getText())));
+            if (Double.parseDouble(edX.getText()) > App.tabDoc.getRightDomainBorder()) {
+                App.tabDoc.addElemToTail(
+                        new FunctionPoint(Double.parseDouble(edX.getText()), Double.parseDouble(edY.getText())));
+            } else if (Double.parseDouble(edX.getText()) < App.tabDoc.getLeftDomainBorder()) {
+                showMessageDialog("Wrong values", "X argument is less than than left domain border", AlertType.WARNING);
+            } else {
+                for (int i = 0; i < App.tabDoc.getStructureLength() - 1; i++) {
+                    if (App.tabDoc.getPoint(i).getX() < Double.parseDouble(edX.getText())
+                            && App.tabDoc.getPoint(i + 1).getX() > Double.parseDouble(edX.getText()))
+                        App.tabDoc.addElemByIndex(i, new FunctionPoint(Double.parseDouble(edX.getText()),
+                                Double.parseDouble(edY.getText())));
+                }
+            }
         } catch (NumberFormatException | InappropriateFunctionPointException e) {
-            Alert alert = new Alert(AlertType.WARNING);
-            alert.setTitle("Wrong values");
-            alert.setContentText("Inappropriate Function Point Exception or Number Format Exception");
-            alert.showAndWait();
+            showMessageDialog("Wrong values", "Inappropriate Function Point Exception\nor Number Format Exception",
+                    AlertType.WARNING);
         }
     }
 
     /**
-     * called when the "Delete" button is clicked
+     * Called when the "Delete" button is clicked
      * 
      * @param event
      */
     @FXML
     private void btnDeleteClick(ActionEvent event) {
-        int rowIndex = table.getSelectionModel().getSelectedIndex();
-        App.tabDoc.deleteElemByIndex(rowIndex);
+        if (table.getSelectionModel().getSelectedIndex() != -1) {
+            if (App.tabDoc.getStructureLength() > 3) {
+                int rowIndex = table.getSelectionModel().getSelectedIndex();
+                App.tabDoc.deleteElemByIndex(rowIndex);
+            } else {
+                showMessageDialog("Can't delete a point", "Function should have at least 3 points", AlertType.ERROR);
+            }
+        } else {
+            showMessageDialog("Can't delete a point", "Secelct point for delition", AlertType.ERROR);
+        }
     }
 
     @FXML
@@ -113,11 +132,8 @@ public class MainframeController {
      */
     @FXML
     private void keyTyped(KeyEvent event) {
-        // TODO finish for keyboard events
-        // KeyCode key = event.getCode(); // Keyboard code for the pressed key
-        // if (key == KeyEvent.VK_UP) {
-        // System.out.println("clicked");
-        // }
+        if (event.getCode() == KeyCode.UP || event.getCode() == KeyCode.DOWN)
+            labelRedraw();
     }
 
     private void labelRedraw() {
@@ -167,14 +183,9 @@ public class MainframeController {
 
     @FXML
     private void saveFunctionInCustomFile() {
-
-        // TODO add ability to choose file to save into
-        if (App.tabDoc.isFileNameAssigned()) {
-            App.tabDoc.saveFunction();
-            showMessageDialog("", "Function was saved successfully", AlertType.INFORMATION);
-        } else {
-            showMessageDialog("File name is not assigned", "Function could not be saved", AlertType.WARNING);
-        }
+        File file = (new FileChooser()).showOpenDialog((Stage) table.getScene().getWindow());
+        App.tabDoc.saveFunctionAs(file.getAbsolutePath());
+        showMessageDialog("Success", "Function was saved successfully", AlertType.INFORMATION);
     }
 
     @FXML
@@ -221,7 +232,7 @@ public class MainframeController {
         } catch (IllegalArgumentException e) {
             showMessageDialog("Exception was thrown", "Illegal Argument Exception", AlertType.WARNING);
         } catch (InappropriateFunctionPointException e) {
-            showMessageDialog("Exception was thrown", "Inappropriate Function PointException", AlertType.WARNING);
+            showMessageDialog("Exception was thrown", "Inappropriate Function Point Exception", AlertType.WARNING);
         } catch (InvocationTargetException e) {
             showMessageDialog("Exception was thrown", "Invocation Target Exception", AlertType.WARNING);
         } catch (NoSuchMethodException e) {
@@ -265,5 +276,4 @@ public class MainframeController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
 }
