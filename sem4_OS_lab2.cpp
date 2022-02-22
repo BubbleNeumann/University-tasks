@@ -2,8 +2,26 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <iostream>
-#include <time.h>
+#include <regex>
 
+
+void readAndHandleUserInput()
+{
+
+    const std::regex rxcp{R"(^(cp|mv)\s[a-z.0-9\-\_\\]+\s[a-z.0-9\-\_]+$)"};
+    // const std::regex rxcp{R"(^cp\s\w+\.\w+\s\w+\.\w+$)"};
+
+    std::string inp;
+
+    getline(std::cin, inp);
+
+    if (regex_match(inp, rxcp))
+    {
+        std::cout << "cool\n";
+    }
+
+
+}
 
 void showHelp()
 {
@@ -56,7 +74,7 @@ void getFileInfo(std::string filename = "sem4_OS_lab2.cpp")
     std::cout << "last edit: " << buff << std::endl;
 }
 
-void changeFilePermissions(std::string mode, std::string filename)
+void changeFilePermissions(std::string mode, std::string filename = "sem4_OS_lab2.cpp")
 {
 
 }
@@ -65,7 +83,9 @@ void changeFilePermissions(std::string mode, std::string filename)
 int main()
 {
     
-    getFileInfo();
+    readAndHandleUserInput();
+
+    // getFileInfo();
 
     // showHelp();
 
