@@ -3,30 +3,14 @@
 #include <unistd.h>
 #include <iostream>
 #include <regex>
+#include <sstream>
+#include <fstream>
 
 
-void readAndHandleUserInput()
-{
-
-    const std::regex rxcp{R"(^(cp|mv)\s[a-z.0-9\-\_\\]+\s[a-z.0-9\-\_]+$)"};
-    // const std::regex rxcp{R"(^cp\s\w+\.\w+\s\w+\.\w+$)"};
-
-    std::string inp;
-
-    getline(std::cin, inp);
-
-    if (regex_match(inp, rxcp))
-    {
-        std::cout << "cool\n";
-    }
-
-
-}
-
-void showHelp()
+inline void showHelp()
 {
     std::cout << "cp SOURCE DEST\n" << "mv SOURCE DEST\n" 
-        << "stat FILE\n"<< "chmod MODE FILE" << std::endl;
+        << "stat FILE\n" << "chmod MODE FILE\n" << "q to quit" << std::endl;
 }
 
 
@@ -42,11 +26,16 @@ void move(std::string source, std::string dest)
 
 void getFileInfo(std::string filename = "sem4_OS_lab2.cpp")
 {
-    // convert std::string to const char*
-    const char* chfilename = filename.c_str();
+    // check if file exists
+    std::ifstream filestream(filename.c_str());
+    if (!filestream.good())
+    {
+        std::cout << "File does not exist";
+        return;
+    }
 
     struct stat st;
-    stat(chfilename, &st);
+    stat(filename.c_str(), &st);
 
     // size of given file
     std::cout << st.st_size << " bytes" << std::endl;
@@ -79,15 +68,80 @@ void changeFilePermissions(std::string mode, std::string filename = "sem4_OS_lab
 
 }
 
+int readAndHandleUserInput()
+{
+    const std::regex rxcpmv{R"(^(cp|mv)\s[A-Za-z.0-9\-\_\\]+\s[A-Za-z.0-9\-\_]+$)"};
+    const std::regex rxchmod{R"(^chmod\s[ugoarwx+-]{3,6}\s[A-Za-z.0-9\-\_]+$)"};
+    const std::regex rxstat{R"(^stat\s[A-Za-z.0-9\-\_\\]+$)"};
+
+    std::string inp;
+
+    getline(std::cin, inp);
+
+    if (regex_match(inp, rxcpmv) || regex_match(inp, rxchmod))
+    {
+        // parse user input
+        const int COMMAND_LEN = 3;
+        std::string inpparce[COMMAND_LEN];
+
+        int i = 0;
+        std::stringstream ssin(inp);        
+        while (ssin.good() && i < COMMAND_LEN)
+        {
+            ssin >> inpparce[i++];
+        }
+
+        // check if file exists and call corresponding function
+        std::ifstream secondpos(inpparce[1].c_str());
+        std::ifstream thirdpos(inpparce[2].c_str());
+        if (secondpos.good() && inpparce[0] == "cp")
+        {
+
+            // TODO check if directory exists
+            
+            std::cout << "cp";
+            copy();
+        }   
+        else if (secondpos.good() && inpparce[0] == "mv")
+        {
+
+            // TODO check if directory exists
+
+            std::cout << "mv";
+            move();
+        }
+        else if (thirdpos.good() && inpparce[0] == "chmod")
+        {
+            std::cout << "chmod";
+            changeFilePermissions(inpparce[1], inpparce[2]);
+        }
+        else
+        {
+            std::cout << "file '" << inpparce[1] << "' does not exist\n";
+        }
+    }    
+    else if (inp == "--help")
+    {
+        showHelp();
+    }
+    else if (inp == "q" || inp == "Q")
+    {
+        return 1;   
+    }
+    else
+    {
+        std::cout << inp << ": command not found\n";
+    }
+
+    return 0;
+}
 
 int main()
-{
-    
-    readAndHandleUserInput();
-
-    // getFileInfo();
-
-    // showHelp();
+{    
+    while(true)
+    {
+        if (readAndHandleUserInput()) break;
+    }
 
     return 0;
 }
