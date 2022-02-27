@@ -5,7 +5,6 @@
 #include <regex>
 #include <sstream>
 #include <fstream>
-#include <filesystem>
 
 /**
  * @brief show list of available commands
@@ -17,79 +16,60 @@ inline void showHelp()
 }
 
 /**
- * @brief copy one file content into another or to another directory
+ * @brief copy one file content into another
  * @param source source file
- * @param dest where to put a new file
+ * @param dest new file
  * @return 1 if error occured, 0 if success
 */
 int copy(std::string source, std::string dest)
 {
-	const int BUFSZ = 65536;
-    // char *buf = malloc(BUFSZ);
+	const int BUFSZ = 4096;
     char buf[BUFSZ];
-    // like mkdir, rmdir, return 0 for success, -1 for failure
-    // if (!buf) return -1; 
-    // FILE *hin = fopen(source.c_str(), "rb");
-
-    // open file in ifstream consructor
-    std::ifstream fileread(source.c_str());
-    if (!fileread.good())
-	{
-		return 1;
-	}
-
-    // FILE *hout = fopen(dest.c_str(), "wb");
     
-    std::ofstream filewrite(dest.c_str());    
-    if (!filewrite.good())
-	{
-        fileread.close();
-		return 1;
-	}
-
-    unsigned int buflen;
-    while ((buflen = fread(buf, 1, BUFSZ)) > 0)
-	{
-        if (buflen != fwrite(buf, 1, buflen))
-		{
-
-
-            // fclose(hout);
-            // fclose(hin);
-            // free(buf);
-            // IO error writing data
-            return 1; 
-        }
+    // open file for reading
+    int readfile;
+    if ((readfile = open(source.c_str(), O_RDONLY)) == -1)
+    {
+        return 1;
     }
 
-    fwrite.close();
+    // open file or create one if does not exists for writing
+    int writefile;
+    if ((writefile = open(dest.c_str(), O_WRONLY | O_CREAT)) == -1)
+    {
+        return 1;
+    }
 
-    // free(buf);
-	// check if fread had indicated IO error on input
-    // int r = ferror(hin) ? -1 : 0; 
-    // fclose(hin);
-	// final case: check if IO error flushing buffer -- don't omit this really can happen; calling `fflush()` won't help.
-    // return fclose(hout) ? -1 : 0; 
+    size_t rbytes, wbytes;
+
+    // read() returns 0 when reaches EOF and -1 if error occurs
+    while ((rbytes = read(readfile, buffer, BUFSZ)) > 0)
+    {
+        wbytes = write(w_fd, buf, rbytes);
+    }
+    
+    close(readfile);
+    close(writefile);
+
     return 0;
 }
 
 /**
- * @brief 
+ * @brief copy file to dest directory, then remove original
  * @param source 
  * @param dest 
+ * @return 1 if error occured, 0 if success
 */
-void move(std::string source, std::string dest)
+int move(std::string source, std::string dest)
 {
-
-  
-
+    return (copy(source, dest) == -1 || unlink(source.c_str()) == -1);    
 }
 
 /**
  * @brief 
  * @param filename 
 */
-void getFileInfo(std::string filename = "sem4_OS_lab2.cpp")
+void getFileInfo(std::string filename)
 {
     // check if file exists
     std::ifstream filestream(filename.c_str());
@@ -106,22 +86,20 @@ void getFileInfo(std::string filename = "sem4_OS_lab2.cpp")
     std::cout << st.st_size << " bytes" << std::endl;
 
     // file permissions
-    // const int MOD_LEN = 9;
-    // char* mod = new char[MOD_LEN];
-    // mode_t perm = st.st_mode;
-    // mod[0] = (perm & S_IRUSR) ? 'r' : '-';
-    // mod[1] = (perm & S_IWUSR) ? 'w' : '-';
-    // mod[2] = (perm & S_IXUSR) ? 'x' : '-';
-    // mod[3] = (perm & S_IRGRP) ? 'r' : '-';
-    // mod[4] = (perm & S_IWGRP) ? 'w' : '-';
-    // mod[5] = (perm & S_IXGRP) ? 'x' : '-';
-    // mod[6] = (perm & S_IROTH) ? 'r' : '-';
-    // mod[7] = (perm & S_IWOTH) ? 'w' : '-';
-    // mod[8] = (perm & S_IXOTH) ? 'x' : '-';
+    const int MOD_LEN = 9;
+    char* mod = new char[MOD_LEN];
+    mode_t perm = st.st_mode;
+    mod[0] = (perm & S_IRUSR) ? 'r' : '-';
+    mod[1] = (perm & S_IWUSR) ? 'w' : '-';
+    mod[2] = (perm & S_IXUSR) ? 'x' : '-';
+    mod[3] = (perm & S_IRGRP) ? 'r' : '-';
+    mod[4] = (perm & S_IWGRP) ? 'w' : '-';
+    mod[5] = (perm & S_IXGRP) ? 'x' : '-';
+    mod[6] = (perm & S_IROTH) ? 'r' : '-';
+    mod[7] = (perm & S_IWOTH) ? 'w' : '-';
+    mod[8] = (perm & S_IXOTH) ? 'x' : '-';
 
-    // std::cout << std::string(mod, MOD_LEN) << std::endl;
-
-    std::cout << std::filesystem::status(filename.c_str().permissions())
+    std::cout << std::string(mod, MOD_LEN) << std::endl;
 
     // last modified time 
     char buff[100];
@@ -134,31 +112,52 @@ void getFileInfo(std::string filename = "sem4_OS_lab2.cpp")
 
 /**
  * @brief 
- * @param mode new permissions
+ * @param mode new permissions to assign
  * @param filename 
 */
-void changeFilePermissions(std::string mode, std::string filename = "sem4_OS_lab2.cpp")
+void changeFilePermissions(std::string mode, std::string filename)
 {
+    const std::string MODES = { "---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx" };
 
-    chmod(filename.c_str());
+    // if mode format consists of digits, change format to rwxrwxrwx
+    if (mode.length() == 3)
+    {
+        int mask = std::stoi(mode);
+        mode = "";
+        while (mask)
+        {
+            mode += conversion[mask % 10];
+            mask /= 10;
+        }
+    }
 
+    // generate permission code
+    int perm = 0;
+    for (int i = 0, int bin = 256; i < mask.length(); i++, bin /=2)
+    {
+        if (mask[i] != "-")
+        {
+            perm += bin;
+        }
+    }
+
+    chmod(filename.c_str(), perm);
 }
 
 /**
- * @brief 
- * @return 
+ * @brief parse user input and call corresponding function
+ * @return 1 if quit and 0 if continue asking user for input
 */
 int readAndHandleUserInput()
 {
     const std::regex rxcpmv{R"(^(cp|mv)\s[A-Za-z.0-9\-\_\\]+\s[A-Za-z.0-9\-\_]+$)"};
-    const std::regex rxchmod{R"(^chmod\s[ugoarwx+-]{3,6}\s[A-Za-z.0-9\-\_]+$)"};
+    const std::regex rxchmod{R"(^chmod\s(([ugoarwx+-]{3,6})|(([0-7])([0-7])([0-7])))\s[A-Za-z.0-9\-\_]+$)"};
     const std::regex rxstat{R"(^stat\s[A-Za-z.0-9\-\_\\]+$)"};
 
     std::string inp;
-
     getline(std::cin, inp);
 
-    if (regex_match(inp, rxcpmv) || regex_match(inp, rxchmod))
+    if (regex_match(inp, rxcpmv) || regex_match(inp, rxchmod) || regex_match(inp, rxstat))
     {
         // parse user input
         const int COMMAND_LEN = 3;
@@ -177,28 +176,22 @@ int readAndHandleUserInput()
         std::ifstream thirdpos(inpparce[2].c_str());
         if (inpparce[0] == "cp" && secondpos.good())
         {
-			// check if directory exists
-			if ((stat(thirdpos, &myStat) == 0) && (((myStat.st_mode) & S_IFMT) == S_IFDIR)) {
-				std::cout << "cp";
-            	if (copy(inpparce[1], inpparce[2]))
-                {
-                    std::cout << "error writing data\n";
-                }
-			}
-			else{
-				std::cout << "directory " << inpparce[2] << " does not exist\n";
-			}
+		    if (copy(inpparce[1], inpparce[2]))
+            {
+                std::cout << "error writing data\n";
+            }
         }   
         else if (inpparce[0] == "mv" && secondpos.good())
         {
-            // check if directory exists
-			if ((stat(thirdpos, &myStat) == 0) && (((myStat.st_mode) & S_IFMT) == S_IFDIR)) {
-				std::cout << "mv";
-            	move();
-			}
-			else{
-				std::cout << "directory " << inpparce[2] << " does not exist\n";
-			}
+            if (move())
+            {
+                std::cout << "error moving file\n";
+            }
+        }
+        else if (inpparce[0] == "chmod" && thirdpos.good())
+        {
+            std::cout << "chmod";
+            changeFilePermissions(inpparce[1], inpparce[2]);
         }
         else if (thirdpos.good() && inpparce[0] == "chmod")
         {
@@ -207,9 +200,12 @@ int readAndHandleUserInput()
         }
         else
         {
-            std::cout << "file '" << inpparce[1] << "' does not exist\n";
+            std::cout << "file '" << inpparce[1] << "' does not exist or command isn't correct\n";
         }
-    }    
+
+        secondpos.close();
+        thirdpos.close();
+    }  
     else if (inp == "--help")
     {
         showHelp();
