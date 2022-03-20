@@ -43,3 +43,18 @@ Catalog:
 1. Packages and archives
 2. Basic language constructions
 3. Exceptions and interfaces
+4.
+5.
+6. app with GUI on Windows
+7. multi-treading, semaphore thing
+8. basic OOP patterns, factories
+
+# Semester 4.
+
+**SysPro**
+2. arithmetic operations on assembly
+3. conditions on assembly
+
+**OS (C++)**
+1. merge two sorted arrays (introduction to Linux)
+2. Linux file system
