@@ -52,7 +52,7 @@ Catalog:
 ## Semester 4.
 
 **SysPro (Assembly)**
-1. 
+1. -
 2. arithmetic operations on assembly
 3. conditions on assembly
 
@@ -65,4 +65,4 @@ Catalog:
 
 **Numerical methods (Python - Jupyter Notebook)**
 1. matrix arithmetics & graphs
-2. matrix
+2. matrix multiplication
