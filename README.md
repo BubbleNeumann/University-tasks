@@ -49,12 +49,20 @@ Catalog:
 7. multi-treading, semaphore thing
 8. basic OOP patterns, factories
 
-# Semester 4.
+## Semester 4.
 
-**SysPro**
+**SysPro (Assembly)**
+1. 
 2. arithmetic operations on assembly
 3. conditions on assembly
 
 **OS (C++)**
 1. merge two sorted arrays (introduction to Linux)
-2. Linux file system
+2. Linux file system, regular expressions
+3. Linux: server-client application
+4. sockets on Windows
+5. named pipes on Windows, threads
+
+**Numerical methods (Python - Jupyter Notebook)**
+1. matrix arithmetics & graphs
+2. matrix
