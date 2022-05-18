@@ -155,8 +155,10 @@ with open('deer.obj', 'r') as fileobj:
 
 # 6
 f = []
+f2 = []
 v = []
 vt = []
+
 for point in range(len(data)):
     if data[point][0] == 'v':
         xyz = []
@@ -166,10 +168,14 @@ for point in range(len(data)):
 
     elif data[point][0] == 'f':
         xyz = []
+        p = []
         for i in range(1, 4):
             x, y = data[point][i].split('/')
             xyz.append(int(x))
+            p.append(int(y))
         f.append(xyz)
+        f2.append(p)
+    
     elif data[point][0] == 'vt':
         xyz = []
         for i in range(1, 4):
@@ -383,32 +389,57 @@ def rotate(point: list, alpha: int, beta: int, gamma: int) -> list:
 
 
 
-# img = np.full((1000, 1000), 255, dtype=np.uint8)  
-# zbuffer = np.full(img.shape, np.inf, np.float64)
+img = np.full((1000, 1000), 255, dtype=np.uint8)  
+zbuffer = np.full(img.shape, np.inf, np.float64)
 
-# for i in f:
-#     # where v is list of all vertices and f is list of all poligons;
+for i in f:
+    # where v is list of all vertices and f is list of all poligons;
 
-#     ax = 0.4
-#     ay = -0.4
-#     rotated_first = rotate(v[i[0] - 1], 0, 30, 0)
-#     rotated_second = rotate(v[i[1] - 1], 0, 30, 0)
-#     rotated_third = rotate(v[i[2] - 1], 0, 30, 0)
+    ax = 0.4
+    ay = -0.4
+    rotated_first = rotate(v[i[0] - 1], 0, 30, 0)
+    rotated_second = rotate(v[i[1] - 1], 0, 30, 0)
+    rotated_third = rotate(v[i[2] - 1], 0, 30, 0)
 
 
-#     firsttriangle = projective_transform(rotated_first[0], rotated_first[1], rotated_first[2], ax, ay, img)
-#     secondtriangle = projective_transform(rotated_second[0], rotated_second[1], rotated_second[2], ax, ay, img)
-#     thirdtriangle = projective_transform(rotated_third[0], rotated_third[1], rotated_third[2], ax, ay, img)
+    firsttriangle = projective_transform(rotated_first[0], rotated_first[1], rotated_first[2], ax, ay, img)
+    secondtriangle = projective_transform(rotated_second[0], rotated_second[1], rotated_second[2], ax, ay, img)
+    thirdtriangle = projective_transform(rotated_third[0], rotated_third[1], rotated_third[2], ax, ay, img)
     
-#     if (firsttriangle[0] > 0 and firsttriangle[1] > 0 and secondtriangle[0] > 0 and secondtriangle[1] > 0 and thirdtriangle[0] > 0 and thirdtriangle[1] > 0):
-#         draw_triangle_with_zbuffer2(firsttriangle, secondtriangle, thirdtriangle, rotated_first, rotated_second, rotated_third, img, zbuffer)
+    if (firsttriangle[0] > 0 and firsttriangle[1] > 0 and secondtriangle[0] > 0 and secondtriangle[1] > 0 and thirdtriangle[0] > 0 and thirdtriangle[1] > 0):
+        draw_triangle_with_zbuffer2(firsttriangle, secondtriangle, thirdtriangle, rotated_first, rotated_second, rotated_third, img, zbuffer)
     
 
-# image = Image.fromarray(img, 'L')
-# image.save('rotateddeer.png')
+image = Image.fromarray(img, 'L')
+image.save('rotateddeer.png')
 
 # 18
+
+def normals_for_each_point(v, f):
+    # normals = np.empty(len(v)) 
+
+    # len(v) = 772
+    # len(f) = 1508
+
+    # normals = np.array([[0, 0, 0]*len(v)])
+    normals = [[0, 0, 0]]*len(v)
+    for i in f:
+        n = find_normal(v[i[0] - 1][0], v[i[0] - 1][1], v[i[0] - 1][2], v[i[1] - 1][0], v[i[1] - 1][1], v[i[1] - 1][2], v[i[2] - 1][0], v[i[2] - 1][1], v[i[2] - 1][2])
+        for j in range(3):
+            normals[i[j] - 1] += n
+
+        # normals[i[0]] += n
+        # normals[i[1]] += n
+        # normals[i[2]] += n 
+    
+    return normals
+
 def shading_color(h1, h2, h3, normal) -> int:
+
+    # calculate normals for all vertices
+    # for each vertice calculate light
+    # for each pixel of a poligon calculate light, using baricentrical coordinates
+
     light_source = [0, 0, 1]
     light_source_norm = np.linalg.norm(light_source)
     l1 = np.cross(normal[0], light_source) / (np.linalg.norm(normal[0]) * light_source_norm)
@@ -438,25 +469,44 @@ def draw_triangle_with_zbuffer3(firstvertice, secondvertice, thirdvertice, origi
            if (lambda1 >= 0 and lambda2 >= 0 and lambda3 >= 0):
                z = lambda1*origin_first[2] + lambda2*origin_second[2] + lambda3*origin_third[2]
                if z <= zbuffer[y, x]:
-                   canvas[y, x] = shading_color(lambda1, lambda2, lambda3, normals)
+                   canvas[y, x] = -shading_color(lambda1, lambda2, lambda3, normals)
                    zbuffer[y, x] = z
 
 
 img = np.full((1000, 1000), 255, dtype=np.uint8)  
 zbuffer = np.full(img.shape, np.inf, np.float64)
-
+n = normals_for_each_point(v, f)
 for i in f:
-    # where v is list of all vertices and f is list of all poligons;
-
+     # where v is list of all vertices and f is list of all poligons;
     ax = 0.4
     ay = -0.4
     firsttriangle = projective_transform(v[i[0] - 1][0], v[i[0] - 1][1], v[i[0] - 1][2], ax, ay, img)
     secondtriangle = projective_transform(v[i[1] - 1][0], v[i[1] - 1][1], v[i[1] - 1][2], ax, ay, img)
     thirdtriangle = projective_transform(v[i[2] - 1][0], v[i[2] - 1][1], v[i[2] - 1][2], ax, ay, img)
-    normals = [ vt[i[0] - 1], vt[i[1] - 1], vt[i[2] - 1]]
+    normals = [ n[i[0] - 1], n[i[1] - 1], n[i[2] - 1]]
     if (firsttriangle[0] > 0 and firsttriangle[1] > 0 and secondtriangle[0] > 0 and secondtriangle[1] > 0 and thirdtriangle[0] > 0 and thirdtriangle[1] > 0):
         draw_triangle_with_zbuffer3(firsttriangle, secondtriangle, thirdtriangle, v[i[0] - 1], v[i[1] - 1], v[i[2] - 1], img, zbuffer, normals)
     
 
 image = Image.fromarray(img, 'L')
 image.save('shadedddeer.png')
+
+
+# len(vt) = 3978
+
+# texturing
+def texture(h1, h2, h3, hight, width, u0, v0, u1, v1, u2, v2):
+    return (width*(h1*u0+h2*u1+h3*u2), hight*(h1*v0+h2*v1+h3*v2))
+
+
+
+
+image_matrix = np.zeros((1000, 1000, 3), dtype=np.uint8)
+image = Image.fromarray(image_matrix, 'RGB')
+
+
+
+image.save('colored.png')
+
+tex = Image.open("cuno_TEX.png")
+tex_array = np.array(tex)
