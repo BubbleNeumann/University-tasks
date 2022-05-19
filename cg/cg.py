@@ -1,7 +1,7 @@
-from random import randint
-from PIL import Image
+from PIL import Image, ImageDraw
 import numpy as np
 import math
+import glob
 
 #1
 # black picture
@@ -389,32 +389,31 @@ def rotate(point: list, alpha: int, beta: int, gamma: int) -> list:
 
 
 
-img = np.full((1000, 1000), 255, dtype=np.uint8)  
-zbuffer = np.full(img.shape, np.inf, np.float64)
+# img = np.full((1000, 1000), 255, dtype=np.uint8)  
+# zbuffer = np.full(img.shape, np.inf, np.float64)
 
-for i in f:
-    # where v is list of all vertices and f is list of all poligons;
+# for i in f:
+#     # where v is list of all vertices and f is list of all poligons;
 
-    ax = 0.4
-    ay = -0.4
-    rotated_first = rotate(v[i[0] - 1], 0, 30, 0)
-    rotated_second = rotate(v[i[1] - 1], 0, 30, 0)
-    rotated_third = rotate(v[i[2] - 1], 0, 30, 0)
+#     ax = 0.4
+#     ay = -0.4
+#     rotated_first = rotate(v[i[0] - 1], 0, 30, 0)
+#     rotated_second = rotate(v[i[1] - 1], 0, 30, 0)
+#     rotated_third = rotate(v[i[2] - 1], 0, 30, 0)
 
 
-    firsttriangle = projective_transform(rotated_first[0], rotated_first[1], rotated_first[2], ax, ay, img)
-    secondtriangle = projective_transform(rotated_second[0], rotated_second[1], rotated_second[2], ax, ay, img)
-    thirdtriangle = projective_transform(rotated_third[0], rotated_third[1], rotated_third[2], ax, ay, img)
+#     firsttriangle = projective_transform(rotated_first[0], rotated_first[1], rotated_first[2], ax, ay, img)
+#     secondtriangle = projective_transform(rotated_second[0], rotated_second[1], rotated_second[2], ax, ay, img)
+#     thirdtriangle = projective_transform(rotated_third[0], rotated_third[1], rotated_third[2], ax, ay, img)
     
-    if (firsttriangle[0] > 0 and firsttriangle[1] > 0 and secondtriangle[0] > 0 and secondtriangle[1] > 0 and thirdtriangle[0] > 0 and thirdtriangle[1] > 0):
-        draw_triangle_with_zbuffer2(firsttriangle, secondtriangle, thirdtriangle, rotated_first, rotated_second, rotated_third, img, zbuffer)
+#     if (firsttriangle[0] > 0 and firsttriangle[1] > 0 and secondtriangle[0] > 0 and secondtriangle[1] > 0 and thirdtriangle[0] > 0 and thirdtriangle[1] > 0):
+#         draw_triangle_with_zbuffer2(firsttriangle, secondtriangle, thirdtriangle, rotated_first, rotated_second, rotated_third, img, zbuffer)
     
 
-image = Image.fromarray(img, 'L')
-image.save('rotateddeer.png')
+# image = Image.fromarray(img, 'L')
+# image.save('rotateddeer.png')
 
 # 18
-
 def normals_for_each_point(v, f):
     # normals = np.empty(len(v)) 
 
@@ -489,24 +488,55 @@ for i in f:
     
 
 image = Image.fromarray(img, 'L')
-image.save('shadedddeer.png')
+image.save('shadeddeer.png')
 
 
 # len(vt) = 3978
 
-# texturing
-def texture(h1, h2, h3, hight, width, u0, v0, u1, v1, u2, v2):
-    return (width*(h1*u0+h2*u1+h3*u2), hight*(h1*v0+h2*v1+h3*v2))
+# 19
+# generate gif
+
+def spawn_images_for_gif(frames: int) -> None:
+
+    for i in range(0, frames + 1):
+
+        img = np.full((1000, 1000), 255, dtype=np.uint8)  
+        zbuffer = np.full(img.shape, np.inf, np.float64)
+        rad = - (360/frames)*i*(math.pi/180)
+
+        for j in f:
+
+            ax = 0.4
+            ay = -0.4
+
+            rotated_first = rotate(v[j[0] - 1], 0, rad, 0)
+            rotated_second = rotate(v[j[1] - 1], 0, rad, 0)
+            rotated_third = rotate(v[j[2] - 1], 0, rad, 0)
+
+            firsttriangle = projective_transform(rotated_first[0], rotated_first[1], rotated_first[2], ax, ay, img)
+            secondtriangle = projective_transform(rotated_second[0], rotated_second[1], rotated_second[2], ax, ay, img)
+            thirdtriangle = projective_transform(rotated_third[0], rotated_third[1], rotated_third[2], ax, ay, img)
+            
+            if (firsttriangle[0] > 0 and firsttriangle[1] > 0 and secondtriangle[0] > 0 and secondtriangle[1] > 0 and thirdtriangle[0] > 0 and thirdtriangle[1] > 0):
+                draw_triangle_with_zbuffer2(firsttriangle, secondtriangle, thirdtriangle, rotated_first, rotated_second, rotated_third, img, zbuffer)                
+        
+
+            image = Image.fromarray(img, 'L')
+            image.save(f'deer{i}.png')
 
 
+def compile_gif() -> None:   
+
+    frames = []
+    # imgs = sorted(glob.glob("*.png"))
+    for i in sorted(glob.glob("*.png")):
+        new_frame = Image.open(i)
+        frames.append(new_frame)
+
+    frames[0].save('deer.gif', format='GIF', append_images=frames[1:], save_all=True, duration=300, loop=0)
 
 
-image_matrix = np.zeros((1000, 1000, 3), dtype=np.uint8)
-image = Image.fromarray(image_matrix, 'RGB')
+FRAMES = 12 # how many images will be spawn for a gif
 
-
-
-image.save('colored.png')
-
-tex = Image.open("cuno_TEX.png")
-tex_array = np.array(tex)
+spawn_images_for_gif(FRAMES)
+compile_gif()
