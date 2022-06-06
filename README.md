@@ -52,9 +52,11 @@ Catalog:
 ## Semester 4.
 
 **SysPro (Assembly)**
-1. -
-2. arithmetic operations on assembly
-3. conditions on assembly
+1. --
+2. arithmetic operations
+3. conditions & conditional jumps
+4. arrays and loops
+5. coprocessor: arithmetic operations
 
 **OS (C++)**
 1. merge two sorted arrays (introduction to Linux)
@@ -62,6 +64,7 @@ Catalog:
 3. Linux: server-client application
 4. sockets on Windows
 5. named pipes on Windows, threads
+6. sokets and UI on Windows (Python)
 
 **Numerical methods (Python - Jupyter Notebook)**
 1. matrix arithmetics & graphs
