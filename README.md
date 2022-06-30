@@ -57,6 +57,7 @@ Catalog:
 3. conditions & conditional jumps
 4. arrays and loops
 5. coprocessor: arithmetic operations
+6. coprocessor: onditional jumps
 
 **OS (C++)**
 1. merge two sorted arrays (introduction to Linux)
@@ -64,8 +65,11 @@ Catalog:
 3. Linux: server-client application
 4. sockets on Windows
 5. named pipes on Windows, threads
-6. sokets and UI on Windows (Python)
+6. sockets and UI on Windows (Python)
 
 **Numerical methods (Python - Jupyter Notebook)**
 1. matrix arithmetics & graphs
 2. matrix multiplication
+3. QR-decomposition
+4. Newton interpolation formula
+5. half division method and chord method
