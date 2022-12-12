@@ -1,7 +1,9 @@
 import sys
 
+from dataclasses import dataclass
+
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtWidgets import (QApplication, QLabel, QWidget,
+from PyQt5.QtWidgets import (QApplication, QGridLayout, QLabel, QWidget,
                              QLineEdit, QVBoxLayout, QPushButton, QMessageBox)
 
 # globals
@@ -19,19 +21,44 @@ TODO:
 - create window for data modification
 '''
 
-
-def handle_inp():
-    pass
+NO_ID = -1
 
 
-def ask_id(action: str):
+@dataclass
+class Paper:
+    id_r: int = NO_ID
+    id: int = NO_ID
+
+    # needed when creating a new obj
+    def assign_id(self):
+        # get max id for id_r and id. assign corresponding fields with max+1
+        pass
+
+
+# set id field of Paper obj
+def set_id(obj: Paper, action: str) -> None:
+
+    # TODO: implement id check
+    def id_is_valid(id: int) -> bool:
+        return True
+
+    def on_submit(text_area, ask_id_window) -> None:
+        user_input = text_area.text()
+        text_area.clear()
+        if id_is_valid(int(user_input)):
+            obj.id = user_input
+
+        # TODO: reprompt user if id is not valid
+
+        ask_id_window.close()
+
     ask_id_window.setGeometry(1000, 1000, 400, 200)
     layout = QVBoxLayout()
     msg = QLabel(f'ID of an object to {action}:', parent=ask_id_window)
     text_area = QLineEdit(parent=ask_id_window)
     text_area.setValidator(QIntValidator())
     submit_button = QPushButton('submit')
-    submit_button.clicked.connect(handle_inp)
+    submit_button.clicked.connect(lambda: on_submit(text_area, ask_id_window))
     layout.addWidget(msg)
     layout.addWidget(text_area)
     layout.addWidget(submit_button)
@@ -39,20 +66,42 @@ def ask_id(action: str):
     ask_id_window.show()
 
 
+# display all data from papers as table
 def show_report_window() -> None:
     report_window.setGeometry(2000, 1000, 600, 500)
     report_window.show()
 
 
+# request data from user
+# user shouldn't be able to edit id_r and id fields
 def show_modif_window(update=False) -> None:
-    if update:
-        id = ask_id('update')
 
+    def on_submit(modif_window):
+        modif_window.close()
+
+    paper = Paper()
+
+    # layout = QVBoxLayout()
+    layout = QGridLayout()
+    submit_button = QPushButton('submit')
+
+    if update:
+        set_id(obj=paper, action='update')
+
+    else:
+        # get max id from db
+        # id = max id + 1
+
+        pass
+
+    submit_button.clicked.connect(lambda: on_submit(modif_window))
+    layout.addWidget(submit_button)
+    modif_window.setLayout(layout)
     modif_window.show()
 
 
 def delete_row() -> None:
-    id = ask_id(action='delete')
+    id = set_id(action='delete')
 
 
 def main() -> None:
