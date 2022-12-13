@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import (QApplication, QGridLayout, QLabel, QWidget,
-                             QLineEdit, QVBoxLayout, QPushButton, QMessageBox)
+                             QLineEdit, QVBoxLayout, QPushButton)
 
 # globals
 app = QApplication(sys.argv)
@@ -36,7 +36,7 @@ class Paper:
 
 
 # set id field of Paper obj
-def set_id(obj: Paper, action: str) -> None:
+def set_id(obj: Paper, action_prompt: str) -> None:
 
     # TODO: implement id check
     def id_is_valid(id: int) -> bool:
@@ -54,7 +54,7 @@ def set_id(obj: Paper, action: str) -> None:
 
     ask_id_window.setGeometry(1000, 1000, 400, 200)
     layout = QVBoxLayout()
-    msg = QLabel(f'ID of an object to {action}:', parent=ask_id_window)
+    msg = QLabel(f'ID of an object to {action_prompt}:', parent=ask_id_window)
     text_area = QLineEdit(parent=ask_id_window)
     text_area.setValidator(QIntValidator())
     submit_button = QPushButton('submit')
@@ -74,49 +74,70 @@ def show_report_window() -> None:
 
 # request data from user
 # user shouldn't be able to edit id_r and id fields
-def show_modif_window(update=False) -> None:
-
-    def on_submit(modif_window):
-        modif_window.close()
-
-    paper = Paper()
-
-    # layout = QVBoxLayout()
-    layout = QGridLayout()
+def prompt_field_values(opt: str) -> None:
+    obj_names = ['id_r', 'Title', 'id', 'Type', 'SectionName', 'SDate']
     submit_button = QPushButton('submit')
+    # layout.itemAtPosition()
 
-    if update:
-        set_id(obj=paper, action='update')
-
+    if (opt == 'add'):
+        layout_elems = obj_names.copy()
+        layout_elems.remove('id_r')
+        add_row(layout_elems, submit_button)
+    elif (opt == 'upd'):
+        update_row(obj_names, submit_button)
     else:
-        # get max id from db
-        # id = max id + 1
+        delete_row()
 
-        pass
 
-    submit_button.clicked.connect(lambda: on_submit(modif_window))
-    layout.addWidget(submit_button)
+def on_submit(layout: QGridLayout, action: str):
+    # TODO: read values from QLineEdit fields
+    modif_window.close()
+    # modif_window.layout().removeWidget()
+    # modif_window.windowType
+
+
+def add_row(layout_elems: list, submit_button: QPushButton):
+    layout = QGridLayout()
+    for i in range(0, len(layout_elems)):
+        layout.addWidget(QLabel(layout_elems[i], parent=modif_window), i, 0)
+        layout.addWidget(QLineEdit(modif_window), i, 1)
+
+    submit_button.clicked.connect(lambda: on_submit(layout, action='add'))
+    layout.addWidget(submit_button, len(layout_elems), 1)
+    modif_window.setLayout(layout)
+    modif_window.show()
+
+
+def update_row(layout_elems: list, submit_button: QPushButton):
+    layout = QGridLayout()
+    for i in range(0, len(layout_elems)):
+        layout.addWidget(QLabel(layout_elems[i], parent=modif_window), i, 0)
+        layout.addWidget(QLineEdit(modif_window), i, 1)
+
+    submit_button.clicked.connect(lambda: on_submit(layout, action='upd'))
+    layout.addWidget(submit_button, len(layout_elems), 1)
     modif_window.setLayout(layout)
     modif_window.show()
 
 
 def delete_row() -> None:
-    id = set_id(action='delete')
+    paper = Paper()
+    set_id(obj=paper, action_prompt='delete')
 
 
-def main() -> None:
+def show_main_window() -> None:
     layout = QVBoxLayout()
     main_window.setWindowTitle('opts')
 
     show_report_button = QPushButton('display info on papers')
     add_button = QPushButton('add row')
-    delete_button = QPushButton('delete row')
     update_button = QPushButton('update row')
+    delete_button = QPushButton('delete row')
 
     show_report_button.clicked.connect(show_report_window)
-    add_button.clicked.connect(show_modif_window)
+    add_button.clicked.connect(lambda: prompt_field_values(opt='add'))
     delete_button.clicked.connect(delete_row)
-    update_button.clicked.connect(lambda: show_modif_window(update=True))
+    update_button.clicked.connect(lambda: prompt_field_values(opt='upd'))
 
     buttons = [value for name, value in locals().items()
                if name.endswith('_button')]
@@ -128,6 +149,9 @@ def main() -> None:
     main_window.setLayout(layout)
     main_window.show()
 
+
+def main() -> None:
+    show_main_window()
     sys.exit(app.exec_())
 
 
