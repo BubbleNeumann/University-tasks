@@ -1,17 +1,28 @@
 import sys
 
-from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import (QApplication, QGridLayout, QLabel, QWidget,
                              QLineEdit, QVBoxLayout, QPushButton)
 
 
 class MainWindow(QWidget):
+    """Main window is created at the application start."""
+
+    def __init__(self):
+        super().__init__()
+        self.modif_window = None
+        self.report_window = None
+        self.setGeometry(1000, 1000, 500, 350)  # left, top, width, height
+        self.setLayout(self.create_layout())
+
     @staticmethod
     def get_available_actions() -> list:
         return ['display table', 'add row', 'update row', 'delete row']
 
     def show_report_window(self) -> None:
-        pass
+        if self.report_window is None:
+            self.report_window = ReportWindow()
+
+        self.report_window.show()
 
     def show_modif_window(self, action: str) -> None:
         if self.modif_window is None:
@@ -35,23 +46,24 @@ class MainWindow(QWidget):
 
         return layout
 
-    def __init__(self):
-        super().__init__()
-        self.modif_window = None
-        self.report_window = None
-        self.setGeometry(1000, 1000, 500, 350)
-        self.setLayout(self.create_layout())
-
 
 class ModifWindow(QWidget):
+    """Modification window requests field values from user."""
+
+    def __init__(self):
+        super().__init__()
+        self.text_areas = []
+        self.setLayout(self.create_layout())
+
     @staticmethod
     def get_available_fields() -> list:
         return ['id_r', 'Title', 'id', 'Type', 'SectionName', 'SDate']
 
     def on_submit(self) -> None:
+        field_values = []
         for text_area in self.text_areas:
-            if text_area.text() != '':
-                print(text_area.text())
+            field_values.append(text_area.text())
+            text_area.clear()
 
         self.close()
 
@@ -69,15 +81,15 @@ class ModifWindow(QWidget):
         layout.addWidget(submit_btn, len(lables), 1)
         return layout
 
-    def __init__(self):
-        super().__init__()
-        self.text_areas = []
-        self.setLayout(self.create_layout())
-
 
 class ReportWindow(QWidget):
+    """Dump all data table contains as a table."""
+
     def __init__(self):
         super().__init__()
+
+    def create_layout(self):
+        pass
 
 
 def main() -> None:
