@@ -73,6 +73,8 @@ class ModifWindow(QWidget):
         super().__init__()
         self.qlineedit_conditions = []
         self.qlineedit_new_values = []
+        self.qlineedit_conditions_part = []
+        self.qlineedit_new_values_part = []
         self.setLayout(self.create_layout(action, table))
 
     @staticmethod
@@ -161,14 +163,22 @@ class ModifWindow(QWidget):
         new_values = []
         counter = 0
         
-        for i in range(0, len(self.qlineedit_conditions)):
-            conditions.append(self.qlineedit_conditions[i].text())
-            new_values.append(self.qlineedit_new_values[i].text())
-            self.qlineedit_conditions[i].clear()
-            self.qlineedit_new_values[i].clear()
-            counter += int(new_values[i] != '')
+        if table == 'papers':
+            for i in range(0, len(self.qlineedit_conditions)):
+                conditions.append(self.qlineedit_conditions[i].text())
+                new_values.append(self.qlineedit_new_values[i].text())
+                self.qlineedit_conditions[i].clear()
+                self.qlineedit_new_values[i].clear()
+                counter += int(new_values[i] != '')
+        else:
+            for i in range(0, len(self.qlineedit_conditions_part)):
+                conditions.append(self.qlineedit_conditions_part[i].text())
+                new_values.append(self.qlineedit_new_values_part[i].text())
+                self.qlineedit_conditions_part[i].clear()
+                self.qlineedit_new_values_part[i].clear()
+                counter += int(new_values[i] != '')
             
-        if action == 'add' and counter != 5:
+        if action == 'add' and ((counter != 5 and table == 'papers') or (counter != 6 and table != 'papers')):
             pass
         else:
             ModifWindow.modify_table(action, conditions, new_values, table)
@@ -176,6 +186,8 @@ class ModifWindow(QWidget):
 
     def create_layout(self, action, table) -> QGridLayout:
         layout = QGridLayout()
+        
+        # papers layout
         lables = [QLabel(field + ' = ', self)
                   for field in ModifWindow.get_papers_fields()]
         
@@ -188,9 +200,28 @@ class ModifWindow(QWidget):
             layout.addWidget(self.qlineedit_conditions[i], i, 1)
             layout.addWidget(self.qlineedit_new_values[i], i, 2)
 
-        submit_btn = QPushButton('submit')
+        submit_btn = QPushButton('submit papers')
         submit_btn.clicked.connect(lambda: self.on_submit(action, table))
         layout.addWidget(submit_btn, len(lables), 2)
+        
+        # participants layout
+        lables_p = [QLabel(field + ' = ', self)
+                  for field in ModifWindow.get_participants_fields()]
+        
+        self.qlineedit_conditions_part = [QLineEdit(self) for _ in lables_p]
+        self.qlineedit_new_values_part = [QLineEdit(self) for _ in lables_p]
+        
+        
+        for i in range(0, len(lables_p)):
+            layout.addWidget(lables_p[i], i+len(lables)+1, 0)
+            layout.addWidget(self.qlineedit_conditions_part[i], i+len(lables)+1, 1)
+            layout.addWidget(self.qlineedit_new_values_part[i], i+len(lables)+1, 2)
+
+        submit_btn_part = QPushButton('submit participants')
+        submit_btn_part.clicked.connect(lambda: self.on_submit(action, 'participants'))
+        layout.addWidget(submit_btn_part, len(lables_p)+len(lables)+1, 2)
+        
+        
         return layout
 
 
