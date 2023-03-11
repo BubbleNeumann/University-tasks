@@ -1,4 +1,4 @@
-Catalog:
+Index:
 
 ## Semester 1.
 
@@ -43,8 +43,8 @@ Catalog:
 1. Packages and archives
 2. Basic language constructions
 3. Exceptions and interfaces
-4.
-5.
+4. --
+5. --
 6. app with GUI on Windows
 7. multi-treading, semaphore thing
 8. basic OOP patterns, factories
@@ -73,3 +73,14 @@ Catalog:
 3. QR-decomposition
 4. Newton interpolation formula
 5. half division method and chord method
+
+### Semester 5.
+
+**Data Bases**
+9. App which allows to connect to db and modify tables - Python
+
+### Semester 6.
+
+**Optimizaton Methods - RUST**
+1. one dimensional methods for finding func extremum
+
