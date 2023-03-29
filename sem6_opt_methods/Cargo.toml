@@ -3,10 +3,16 @@ name = "sem6_opt_methods"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+
+# [[bin]]
+# name = "classnotes"
+# path = "src/classnotes.rs"
 
 [[bin]]
 name = "lab1"
 path = "src/lab1.rs"
+
+[[bin]]
+name = "lab2"
+path = "src/lab2.rs"
