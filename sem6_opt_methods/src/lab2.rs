@@ -3,24 +3,24 @@ mod common;
 use crate::common::*;
 use std::vec;
 
-type VecMutRef<'a> = &'a mut Vec<f64>;
-type VecRef<'a> = &'a Vec<f64>;
-type Func = fn(&Vec<f64>) -> f64;
+pub type VecRef<'a> = &'a Vec<f64>;
+pub type VecMutRef<'a> = &'a mut Vec<f64>;
+pub type Func = fn(&Vec<f64>) -> f64;
 
-fn zip_map(a: VecRef, b: VecRef, f: &dyn Fn(f64, f64) -> f64) -> Vec<f64> {
+pub fn zip_map(a: VecRef, b: VecRef, f: &dyn Fn(f64, f64) -> f64) -> Vec<f64> {
     a.iter().zip(b.iter()).map(|(ai, bi)| f(*ai, *bi)).collect()
 }
 
-fn magnitude(vec: VecRef) -> f64 {
+pub fn magnitude(vec: VecRef) -> f64 {
     vec.iter().map(|x| x * x).sum::<f64>().sqrt()
 }
 
-fn normalize(vec: VecRef) -> Vec<f64> {
+pub fn normalize(vec: VecRef) -> Vec<f64> {
     let mag = 1. / magnitude(vec);
     vec.iter().map(|x| x * mag).collect()
 }
 
-fn bisect(func: Func, a: VecMutRef, b: VecMutRef) -> Vec<f64> {
+pub fn bisect(func: Func, a: VecMutRef, b: VecMutRef) -> Vec<f64> {
     let dir = normalize(&zip_map(&a, &b, &|x, y| y - x)); // direction
     let mut xc: Vec<f64> = Vec::with_capacity(a.len());
     for _ in 0..ITERS_MAX {
@@ -50,7 +50,6 @@ fn coord_desc(func: Func, start: VecRef) -> Vec<f64> {
     let mut x0 = start.clone();
     let mut x1 = start.clone();
 
-
     let step = 1.;
     let (mut xi, mut y0, mut y1): (f64, f64, f64);
 
@@ -72,11 +71,11 @@ fn coord_desc(func: Func, start: VecRef) -> Vec<f64> {
         if (x1[coord_id] - xi).abs() < EPS {
             opt_coord_n += 1;
             if opt_coord_n == x1.len() {
-                return x0
+                return x0;
             }
 
             continue;
-        } 
+        }
 
         opt_coord_n = 0;
     }

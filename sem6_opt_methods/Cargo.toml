@@ -16,3 +16,11 @@ path = "src/lab1.rs"
 [[bin]]
 name = "lab2"
 path = "src/lab2.rs"
+
+[[bin]]
+name = "lab3"
+path = "src/lab3.rs"
+
+[[bin]]
+name = "lab4"
+path = "src/lab4.rs"

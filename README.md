@@ -77,10 +77,15 @@ Index:
 ### Semester 5.
 
 **Data Bases**
+
 9. App which allows to connect to db and modify tables - Python
 
 ### Semester 6.
 
 **Optimizaton Methods - RUST**
 1. one dimensional methods for finding func extremum
+2. (multi-dimensional) per coord descent using bisect
+
+**Theory of Random Processes**
+autoregressive moving-average model (ARMA)
 
