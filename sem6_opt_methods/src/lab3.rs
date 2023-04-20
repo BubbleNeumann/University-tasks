@@ -6,20 +6,20 @@ use crate::common::*;
 mod lab2;
 use crate::lab2::*;
 
-fn partial_derivative(func: Func, x: VecMutRef, coord_ind: usize) -> f64 {
-    x[coord_ind] += EPS;
+pub fn partial_derivative(func: Func, x: VecMutRef, coord_ind: &usize) -> f64 {
+    x[*coord_ind] += EPS;
     let plus = func(x);
-    x[coord_ind] -= 2.0 * EPS;
+    x[*coord_ind] -= 2.0 * EPS;
     let minus = func(x);
-    x[coord_ind] += EPS;
+    x[*coord_ind] += EPS;
     (plus - minus) / EPS * 0.5
 }
 
-fn gradient(func: Func, x: VecRef) -> Vec<f64> {
+pub fn gradient(func: Func, x: VecRef) -> Vec<f64> {
     let mut x_copy = x.clone();
     let mut df: Vec<f64> = vec![0.; x.len()];
     for i in 0..x.len() {
-        df[i] = partial_derivative(func, &mut x_copy, i);
+        df[i] = partial_derivative(func, &mut x_copy, &i);
     }
     df
 }
