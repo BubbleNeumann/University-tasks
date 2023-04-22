@@ -14,8 +14,3 @@ pub fn vec_func(x: &Vec<f64>) -> f64 {
     (x[0] - 5.) * x[0] + (x[1] - 3.) * x[1] // min at point x = 2.5, y = 1.5
 }
 
-pub fn bounded_func(args: &Vec<f64>) -> f64 {
-    vec_func(args)
-        + (1. / (5. - args[0] * 2. + args[1] * 3.))
-        + (1. / (6. + args[0] * 3. - args[1]))
-}

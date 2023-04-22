@@ -24,7 +24,7 @@ pub fn gradient(func: Func, x: VecRef) -> Vec<f64> {
     df
 }
 
-fn grad_desc(func: Func, start: VecRef) -> Vec<f64> {
+pub fn grad_desc(func: Func, start: VecRef) -> Vec<f64> {
     let mut x_i = start.clone();
     let (mut x_i_1, mut grad): (Vec<f64>, Vec<f64>);
     for _ in 0..ITERS_MAX {
