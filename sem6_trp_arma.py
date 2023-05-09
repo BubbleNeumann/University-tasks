@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import math
 import numpy as np
+import scipy
 
 f = open('sem6_trp_arma_input.txt', 'r')
 inp = [float(line.strip()) for line in f]
@@ -30,7 +31,7 @@ def r_k(k: int) -> float:
     return R_k(k) / R_k(0)
 
 
-r = [r_k(i) for i in range(11)]
+r = [r_k(i) for i in range(11)]  # normalized corr func of the source process
 
 print('\ncorr func', [R_k(i) for i in range(11)])
 print('\nnormalized corr func:', r)
@@ -46,31 +47,33 @@ plt.legend(handles=[p1, p2])
 # plt.savefig('pic2.jpg')
 
 
+R = [R_k(i) for i in range(4)]  # corr function of the source process
+
+
 # Autoregressive Models
 
 def AR_coef(M: int) -> np.array:
-    R_k_l = [R_k(i) for i in range(M+1)]
     match M:
         case 0:
-            return np.array([math.sqrt(R_k_l[0])])
+            return np.array([math.sqrt(R[0])])
         case 1:
-            matrix = np.array([[R_k_l[1], 1.], [R_k_l[0], 0.]])
-            vec = np.array([R_k_l[0], R_k_l[1]])
+            matrix = np.array([[R[1], 1.], [R[0], 0.]])
+            vec = np.array([R[0], R[1]])
         case 2:
             matrix = np.array([
-                [R_k_l[1], R_k_l[2], 1.],
-                [R_k_l[0], R_k_l[2], 0.],
-                [R_k_l[1], R_k_l[0], 0.]
+                [R[1], R[2], 1.],
+                [R[0], R[2], 0.],
+                [R[1], R[0], 0.]
             ])
-            vec = np.array([R_k_l[0], R_k_l[1], R_k_l[2]])
+            vec = np.array([R[0], R[1], R[2]])
         case 3:
             matrix = np.array([
-                [R_k_l[1], R_k_l[2], R_k_l[3], 1.],
-                [R_k_l[0], R_k_l[2], R_k_l[3], 0.],
-                [R_k_l[1], R_k_l[0], R_k_l[3], 0.],
-                [R_k_l[1], R_k_l[2], R_k_l[0], 0.]
+                [R[1], R[2], R[3], 1.],
+                [R[0], R[2], R[3], 0.],
+                [R[1], R[0], R[3], 0.],
+                [R[1], R[2], R[0], 0.]
             ])
-            vec = np.array([R_k_l[0], R_k_l[1], R_k_l[2], R_k_l[3]])
+            vec = np.array([R[0], R[1], R[2], R[3]])
 
     res = np.linalg.solve(matrix, vec)
     res[M] = math.sqrt(res[M])
@@ -78,9 +81,10 @@ def AR_coef(M: int) -> np.array:
 
 
 def r_ar(M: int, i: int) -> float:
-    """Corr function"""
+    """theoretical corr function"""
     if M >= i:
-        return r_k(i)
+        # return r_k(i)
+        return r[i]
     elif M == 0 and i > 0:
         return 0
     beta = AR_coef(M)
@@ -89,6 +93,50 @@ def r_ar(M: int, i: int) -> float:
 
 print('\nAR_coef: ', [list(AR_coef(i).round(4)) for i in range(4)])
 # print('\nr_ar: ', [round(r_ar(3, i), 4) for i in range(11)])
-print('\neps: ', [round(sum([pow(r_ar(j, i) - r_k(i), 2) for i in range(11)]), 8) for j in range(4)])
+print('\nar eps: ', [round(sum([pow(r_ar(j, i) - r[i], 2) for i in range(11)]), 8) for j in range(4)])
 
-print(AR_coef(0))
+
+# Moving-Average Models
+
+def cc0(x):
+    return math.sqrt(R[0])
+
+
+def cc1(x):
+    return np.array([
+                    x[0]*x[0]+x[1]*x[1]-R[0],
+                    x[0]*x[1]-R[1]
+                    ])
+
+
+def cc2(x):
+    return np.array([
+                    x[0]*x[0]+x[1]*x[1]+x[2]*x[2]-R[0],
+                    x[0]*x[1]+x[1]*x[2]-R[1],
+                    x[0]*x[2]-R[2]
+                    ])
+
+
+def cc3(x):
+    return np.array([
+                    x[0]*x[0]+x[1]*x[1]+x[2]*x[2]+x[3]*x[3]-R[0],
+                    x[0]*x[1]+x[1]*x[2]+x[2]*x[3]-R[1],
+                    x[0]*x[2]+x[1]*x[3]-R[2],
+                    x[0]*x[3]-R[3]
+                    ])
+
+
+for i, cc_func in enumerate([cc0, cc1, cc2, cc3]):
+    if scipy.optimize.root(cc_func, np.zeros(i+1)).success:
+        print(f'{i}: {scipy.optimize.fsolve(cc_func, np.zeros(i+1))}')
+
+
+def r_cc(N: int, i: int) -> float:
+    """theoretical corr function"""
+    return r[i] if N >= i else 0
+
+
+for N in range(4):
+    print([r_cc(N, i) for i in range(11)])
+
+print('\ncc eps: ', [round(sum([pow(r_cc(j, i) - r[i], 2) for i in range(11)]), 8) for j in range(4)])
