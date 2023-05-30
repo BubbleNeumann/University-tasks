@@ -8,6 +8,7 @@ image = 'level1.png'
 hitbox_color = (0,255,0,255)
 bg_color = (0,0,0,255)
 
+
 def get_hitbox_upper_corner(image) -> tuple:
     for x in range(0, image.get_width()):
         for y in range(0, image.get_height()):
