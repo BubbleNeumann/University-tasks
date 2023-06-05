@@ -44,11 +44,10 @@ for i in range(len(inp)):
         print('corr interval ', i)
         break
 
-
 plt.figure(figsize=(8, 5), dpi=80)
 p1, = plt.plot(r, color='r', label='Source')
-p2, = plt.plot([1 / math.exp(1)] * 11, color='blue', label='+1/e -1/e')
-plt.plot([-1 / math.exp(1)] * 11, color='blue')
+p2, = plt.plot([1 / math.exp(1)] * 11, color='b', label='+1/e -1/e')
+plt.plot([-1 / math.exp(1)] * 11, color='b')
 plt.xlabel("Index number")
 plt.ylabel("Normalized correlation function")
 plt.legend(handles=[p1, p2])
@@ -96,7 +95,7 @@ def r_ar(M: int, i: int) -> float:
 
 
 print('\nAR_coef: ', [list(AR_coef(i).round(4)) for i in range(4)])
-# print('\nr_ar: ', [round(r_ar(3, i), 4) for i in range(11)])
+print('\nr_ar3: ', [round(r_ar(3, i), 4) for i in range(11)])
 print('\nar eps: ', [round(sum([pow(r_ar(j, i) - r[i], 2) for i in range(11)]), 8) for j in range(4)])
 
 
@@ -140,13 +139,13 @@ def r_cc(N: int, i: int) -> float:
 for N in range(4):
     print([r_cc(N, i) for i in range(11)])
 
+print('\ncc2 r: ', [round(r_cc(2, i), 4) for i in range(11)])
 print('\ncc eps: ', [round(sum([pow(r_cc(j, i) - r[i], 2) for i in range(11)]), 8) for j in range(4)])
+
 
 # ARMA
 # Build mixed models of autoregression - moving average АRMA(M, N)
 # up to the third order inclusive (M = 1, 2, 3; N = 1, 2, 3) (total 9 models).
-
-
 def arcc11(x):
     a0, a1, b0 = x
     F = np.zeros(3)
@@ -300,11 +299,13 @@ def r_arcc22(i) -> float:
 
 
 for r_func in [r_arcc12, r_arcc13, r_arcc21, r_arcc22]:
-    print(round(sum([pow(r_func(i) - r[i], 2) for i in range(11)]), 6))
+    print(r_func.__name__, round(sum([pow(r_func(i) - r[i], 2) for i in range(11)]), 6))
+
+print('\n r_arcc13', [round(r_arcc13(i), 4) for i in range(11)])
 
 # Comparative analysis of the constructed models
 
-e = [random.uniform(-250, 250) for _ in range(7000)]
+e = [random.uniform(-2, 2) for _ in range(7000)]
 ar3 = [0] * 6000
 ma2 = [0] * 6000
 arma13 = [0] * 6000
@@ -351,6 +352,8 @@ r1 = [r_k_n(i, 1) for i in range(101)]
 r2 = [r_k_n(i, 2) for i in range(101)]
 r3 = [r_k_n(i, 3) for i in range(101)]
 
+print('\n', r1[:10], r2[:10], r3[:10])
+
 
 # print(R_n2)
 r1_t = []
@@ -365,13 +368,11 @@ for i in range(101):
         r1_t.append(res)
 
 r2_t = [r_cc(2, i) for i in range(101)]
-# r2_t = []
-# for i in range(101):
-#     r
-# print(r2_t)
 r3_t = []
 for i in range(101):
     r3_t.append(r[i] if i < 5 else -0.061 * r3_t[i-1])
+
+print('\n', r1_t[:10], r2_t[:10], r3_t[:10])
 
 plt.figure(figsize=(8, 5), dpi=80)
 ax = plt.subplot(111)
@@ -381,7 +382,7 @@ p3, = plt.plot(r1_t[:101], color='g', label='Imitation')
 plt.xlabel("Index number")
 plt.ylabel("Normalized correlation function")
 plt.legend(handles=[p1, p2, p3])
-plt.savefig('pic3.jpg')
+# plt.savefig('pic3.jpg')
 
 plt.figure(figsize=(8, 5), dpi=80)
 ax = plt.subplot(111)
@@ -391,7 +392,7 @@ p3, = plt.plot(r2_t[:101], color='green', label='Imitation')
 plt.xlabel("Index number")
 plt.ylabel("Normalized correlation function")
 plt.legend(handles=[p1, p2, p3])
-plt.savefig('pic4.jpg')
+# plt.savefig('pic4.jpg')
 
 plt.figure(figsize=(8, 5), dpi=80)
 ax = plt.subplot(111)
@@ -401,5 +402,39 @@ p3, = plt.plot(r3_t[:101], color='green', label='Imitation')
 plt.xlabel("Index number")
 plt.ylabel("Normalized correlation function")
 plt.legend(handles=[p1, p2, p3])
-plt.savefig('pic5.jpg')
+# plt.savefig('pic5.jpg')
 
+# ---
+exp_val = sum(i for i in ar3) / len(ar3)
+var = sum((i - exp_val) ** 2 for i in ar3) / (len(ar3) - 1)
+stand_dev = var ** 0.5
+print('\nr_ar3: ', [round(r_ar(3, i), 4) for i in range(11)])
+print('\nar3 eps: ', round(sum([pow(r1[i] - r[i], 2) for i in range(11)]), 8))
+print('\nar3 eps t: ', round(sum([pow(r1_t[i] - r[i], 2) for i in range(11)]), 8))
+
+# ---
+exp_val = sum(i for i in ma2) / len(ma2)
+var = sum((i - exp_val) ** 2 for i in ma2) / (len(ma2) - 1)
+stand_dev = var ** 0.5
+print('cc2 : ', exp_val, var, stand_dev)
+print('\ncc2 eps: ', round(sum([pow(r2[i] - r[i], 2) for i in range(11)]), 8))
+print('\ncc2 eps t: ', round(sum([pow(r2_t[i] - r[i], 2) for i in range(11)]), 8))
+
+# ---
+exp_val = sum(i for i in arma13) / len(arma13)
+var = sum((i - exp_val) ** 2 for i in arma13) / (len(arma13) - 1)
+stand_dev = var ** 0.5
+print('arma13 : ', exp_val, var, stand_dev)
+print('\narma13 eps: ', round(sum([pow(r3[i] - r[i], 2) for i in range(11)]), 8))
+print('\narma13 eps t: ', round(sum([pow(r3_t[i] - r[i], 2) for i in range(11)]), 8))
+
+plt.figure(figsize=(8, 5), dpi=80)
+ax = plt.subplot(111)
+p1, = plt.plot([exp_val] * 101, color='r', label='Average')
+p2, = plt.plot(arma13[:101], color='black', label='ARMA(1, 3)')
+p3, = plt.plot([exp_val + stand_dev] * 101, color='blue', label='Standard deviation')
+plt.plot([exp_val - stand_dev] * 101, color='blue')
+plt.xlabel("Index number")
+plt.ylabel("ARMA(1, 3)")
+plt.legend(handles=[p1, p2, p3])
+plt.savefig('pic6.jpg')
