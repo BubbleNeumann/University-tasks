@@ -1,2 +1,5 @@
 mss
 pillow
+numpy
+opencv-python
+
