@@ -1,3 +1,4 @@
 junit-platform-console-standalone-1.8.1.jar
 **/tests/
 **/.vscode/
+venv
