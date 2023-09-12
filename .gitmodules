@@ -3,4 +3,4 @@
 	url = https://github.com/BubbleNeumann/University-tasks
 [submodule "ct"]
 	path = ct
-	url = /ct
+	url = https://github.com/BubbleNeumann/University-tasks
