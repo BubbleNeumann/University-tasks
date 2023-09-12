@@ -1,6 +1,6 @@
 [submodule "coding-theory"]
 	path = coding-theory
-    url = git:git://github.com/BubbleNeumann/University-tasks.git
+    url = git:git://github.com/BubbleNeumann/University-tasks/coding-theory.git
 [submodule "ct"]
 	path = ct
 	url = https://github.com/BubbleNeumann/University-tasks.git
