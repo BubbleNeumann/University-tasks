@@ -26,7 +26,6 @@ class Student:
         for e in self.lab_work_sessions:
             str_lab_work_sess += e.write_one_to_json()
         str_lab_work_sess = str_lab_work_sess[:-2]
-        # print(str_lab_work_sess[:-1] + ']\n')
         return '{'+f'"unique_id":{self.unique_id},"name":"{self.name}","surname":"{self.surname}","group":{self.group},"subgroup":{self.subgroup},"lab_works_sessions":{str_lab_work_sess}'+']\n}\n'
 
 
@@ -35,3 +34,12 @@ class Student:
         for e in self.lab_work_sessions:
             str_lab_work_sessions += '{' + e.__str__() + '}'
         return f'id={self.unique_id},name={self.name},surname={self.surname},group={self.group},subgroup={self.subgroup},labs={str_lab_work_sessions}'
+
+    def __eq__(self, other):
+        return isinstance(other, Student) and self.unique_id == other.unique_id
+
+    def __hash__(self) -> int:
+        return self.unique_id
+
+    def merge_labs(self, other):
+        self.lab_work_sessions.extend(other.lab_work_sessions)

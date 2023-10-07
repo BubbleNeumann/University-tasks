@@ -8,8 +8,8 @@ def load_students_json(file_path: str) -> Generator[Student, None, None]:
         yield from list(LabWorkSession(date=e['date'],presence=e['presence'],lab_n=e['lab_work_n'],mark=e['lab_work_mark']) for e in json_list)
 
     with open(file_path) as f:
-        for e in json.load(f)['students']:
-            try:
+        try:
+            for e in json.load(f)['students']:
                 yield Student(
                     unique_id = e['unique_id'],
                     name = e['name'],
@@ -18,8 +18,8 @@ def load_students_json(file_path: str) -> Generator[Student, None, None]:
                     subgroup=e['subgroup'],
                     lab_work_sessions=list(parse_lab_work_session(e['lab_works_sessions']))
                     )
-            except e:
-                continue
+        except Exception:
+            return
 
 def save_students_json(file_path: str, students: list[Student]):
     res = '{"students":[\n'
@@ -54,7 +54,8 @@ def load_students_csv(file_path: str) -> Generator[Student, None, None]:
 def save_students_csv(file_path: str, students: list[Student]):
     file_cont = 'unique_id;name;surname;group;subgroup;date;presence;lab_work_number;lab_work_mark\n'
     for s in students:
-        file_cont += ';'.join([ str(e) for e in list(s.__dict__.values())[:-1]]) + ';' + ';'.join([str(e) for e in s.lab_work_sessions[0].__dict__.values()]) + '\n'
+        for i in s.lab_work_sessions:
+                file_cont += ';'.join([ str(e) for e in list(s.__dict__.values())[:-1]]) + ';' + ';'.join([str(e) for e in i.__dict__.values()]) + '\n'
     with open(file_path, 'w') as f:
         f.write(file_cont)
 
@@ -65,13 +66,26 @@ def main(argv):
         save_students_json('resources/students_saved.json', list(students))
         students = load_students_json('resources/students_saved.json')
     elif argv[0] == 'csv':
-        students = load_students_csv('resources/students.csv')
+        students = list(load_students_csv('resources/students.csv'))
+        students_set = set(students)
+
+        while len(students) != len(students_set):
+            for i in students_set:
+                for j in range(len(students)):
+                    if i == students[j]:
+                        i.merge_labs(students[j])
+                        break
+                students.pop(j)
+
+
+        students = list(students_set)
+        for s in students:
+            s.lab_work_sessions = list(set(s.lab_work_sessions))
         save_students_csv('resources/students_saved.csv', list(students))
         students = load_students_csv('resources/students_saved.csv')
     else:
         print(f'unknown option {argv[0]}')
         return
-    
     for s in students:
         print(s)
 
