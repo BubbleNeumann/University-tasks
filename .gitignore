@@ -1,4 +1,6 @@
 junit-platform-console-standalone-1.8.1.jar
-**/tests/
-**/.vscode/
+tests
+.vscode
 venv
+.idea
+.ipynb_checkpoints
