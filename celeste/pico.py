@@ -1,34 +1,71 @@
 import mss.tools
 import numpy as np
 import cv2 as cv
-
-# environment globals
-bounding_box = {'top': 135, 'left': 345, 'width': 400, 'height': 400}
-
-# capture screen
-sct = mss.mss()
-im = np.array(sct.grab(bounding_box))
-
-# convert to grayscale
-# gray_img = cv.cvtColor(im, cv.COLOR_BGR2GRAY)
-# print(gray_img.shape)
-
-# scale image
-# :
-
-cv.imshow('pico fuckkk', im)
-cv.waitKey(0)
+import matplotlib.pyplot as plt
 
 
-# find the character on the screen
-# template = cv.cvtColor(cv.imread('char_template.png'), cv.COLOR_BGR2GRAY)
-template = cv.imread('char_template.png')
+bounding_box_default = {'top': 140, 'left': 360, 'width': 380, 'height': 380}
 
-# cv.imshow('pico char', template)
-# cv.waitKey(0)
-res = cv.matchTemplate(im, template, 2)
 
-_minVal, _maxVal, _minLoc, _maxLoc = cv.minMaxLoc(res, None)
+def get_screen_capture(
+        bounding_box: dict = bounding_box_default) -> np.ndarray:
+    """
+    :param bounding_box: part of the screen to capture
+    :return: grayscale image of the game screen
+    """
+    with mss.mss() as sct:
+        im = np.array(sct.grab(bounding_box_default))
+        return cv.cvtColor(im, cv.COLOR_BGRA2GRAY)
 
-# -1.5 11863070.0 (246, 301) (324, 95)
-print(_minVal, _maxVal, _minLoc, _maxLoc)
+
+def get_screen_capture_with_debug(
+        bounding_box: dict = bounding_box_default) -> np.ndarray:
+    """
+    Shows the captured part of the screen.
+    :param bounding_box: part of the screen to capture
+    :return: grayscale image of the game screen
+    """
+    pixels = get_screen_capture(bounding_box)
+    cv.imshow('', pixels)
+    return pixels
+
+
+def get_char_pos(
+        bg: np.ndarray, template_filepath='template.png') -> tuple[int, int]:
+    """
+    :return: max_loc value, which is the upper left corner of the match
+    """
+    template = cv.cvtColor(
+        np.array(
+            cv.imread(template_filepath)),
+        cv.COLOR_BGRA2GRAY)
+    return cv.matchTemplate(pixels, template, cv.TM_CCOEFF_NORMED)[3]
+
+
+def get_char_pos_with_debug(
+        bg: np.ndarray, template_filepath='template.png') -> tuple[int, int]:
+    """
+    :return: max_loc value, which is the upper left corner of the match
+    """
+    template = cv.cvtColor(
+        np.array(
+            cv.imread(template_filepath)),
+        cv.COLOR_BGRA2GRAY)
+
+    res = cv.matchTemplate(pixels, template, cv.TM_CCOEFF_NORMED)
+    _minVal, _maxVal, _minLoc, _maxLoc = cv.minMaxLoc(res, None)
+
+    top_left = _maxLoc
+    w, h = template.shape
+    bottom_right = (top_left[0] + w, top_left[1] + h)
+
+    cv.rectangle(pixels, top_left, bottom_right, 255, 2)
+    plt.imshow(pixels)
+    plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
+    plt.show()
+    return top_left
+
+
+if __name__ == '__main__':
+    pixels = get_screen_capture_with_debug()
+    char_pos = get_char_pos_with_debug(pixels)
