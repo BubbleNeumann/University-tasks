@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 bounding_box_default = {'top': 140, 'left': 360, 'width': 380, 'height': 380}
-action_space = ['a', 'd', 'space', 'a+x', 'd+x']
+action_space = ['a', 'd', 'space', 'a+x', 'd+x', 'z+w']
 
 COMPRESS_COEFF = 6
 
