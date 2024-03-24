@@ -5,24 +5,25 @@ import matplotlib.pyplot as plt
 
 
 bounding_box_default = {'top': 140, 'left': 360, 'width': 380, 'height': 380}
-action_space = [
-    'a',
-    'd',
-    'space',
-    'a+x',
-    'd+x'
-]
+action_space = ['a', 'd', 'space', 'a+x', 'd+x']
+
+COMPRESS_COEFF = 6
 
 
 def get_screen_capture(
         bounding_box: dict = bounding_box_default) -> np.ndarray:
     """
     :param bounding_box: part of the screen to capture
-    :return: grayscale image of the game screen
+    :return: resized by COMPRESS_COEFF grayscale image of the game screen
     """
     with mss.mss() as sct:
         im = np.array(sct.grab(bounding_box_default))
-        return cv.cvtColor(im, cv.COLOR_BGRA2GRAY)
+        pixels = cv.cvtColor(im, cv.COLOR_BGRA2GRAY)
+        return cv.resize(
+            pixels,
+            (bounding_box['width'] // COMPRESS_COEFF,
+             bounding_box['height'] // COMPRESS_COEFF)
+        )
 
 
 def get_screen_capture_with_debug(
@@ -34,6 +35,7 @@ def get_screen_capture_with_debug(
     """
     pixels = get_screen_capture(bounding_box)
     cv.imshow('', pixels)
+    print(pixels.shape)
     return pixels
 
 
@@ -46,6 +48,8 @@ def get_char_pos(
         np.array(
             cv.imread(template_filepath)),
         cv.COLOR_BGRA2GRAY)
+    w, h = template.shape
+    template = cv.resize(template, (w // COMPRESS_COEFF, h // COMPRESS_COEFF))
     return cv.matchTemplate(pixels, template, cv.TM_CCOEFF_NORMED)[3]
 
 
@@ -58,6 +62,9 @@ def get_char_pos_with_debug(
         np.array(
             cv.imread(template_filepath)),
         cv.COLOR_BGRA2GRAY)
+
+    w, h = template.shape
+    template = cv.resize(template, (w // COMPRESS_COEFF, h // COMPRESS_COEFF))
 
     res = cv.matchTemplate(pixels, template, cv.TM_CCOEFF_NORMED)
     _minVal, _maxVal, _minLoc, _maxLoc = cv.minMaxLoc(res, None)
