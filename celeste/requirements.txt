@@ -1,7 +1,0 @@
-mss
-pillow
-numpy
-opencv-python
-keyboard
-pandas
-
