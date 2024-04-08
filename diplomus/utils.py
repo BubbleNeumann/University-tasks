@@ -5,6 +5,8 @@ import mss.tools
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
+import keyboard
+import time
 
 bounding_box_default = {'top': 70, 'left': 0, 'width': 940, 'height': 520}
 
@@ -73,3 +75,14 @@ def get_char_pos_with_debug(
 
     char_img = bg[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
     return top_left, char_img
+
+
+def press_key(key: str, duration=0.1):
+    keyboard.press(key)
+    time.sleep(duration)
+    keyboard.release(key)
+
+
+def restart():
+    press_key('r')
+    press_key('c')
