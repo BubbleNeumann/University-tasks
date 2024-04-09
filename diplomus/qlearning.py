@@ -10,16 +10,23 @@ action_space = ['a', 'd', 'space', 'a+x', 'd+x', 'z+w']
 # qlearning globals
 eps = 1  # exploration rate
 eps_decay_rate = 0.01  # delta between episodes
-num_episodes = 1000
-max_steps_per_episode = 50
+num_episodes = 100
+max_steps_per_episode = 50  # owtherwise it becomes pointless
 learning_rate = 0.1  # alpha
 discount_rate = 0.99  # gamma
 
 DEFAULT_DIMS = (10, 18)  # (rows, cols)
 
 
-def compose_bg_matrix(dims=DEFAULT_DIMS):
-    return np.zeros(shape=dims)
+def compose_bg_matrix(dims=DEFAULT_DIMS) -> np.ndarray:
+    # return np.zeros(shape=dims)
+    bg = np.zeros(shape=dims)
+
+    # reward gradient leading to the exit
+    for row in range(dims[0]):
+        for col in range(dims[1]):
+            bg[row, col] = np.round((dims[1] - row + col) / 10, 2)
+    return bg
 
 
 def init_qtable(dims=DEFAULT_DIMS) -> np.ndarray:
@@ -42,6 +49,7 @@ def compose_qtable_from_bg_matrix(
 def save_qtable(qtable, file_path='qtable.csv'):
     with open(file_path, 'w') as f:
         csv.writer(f, delimiter=';').writerows(np.round(qtable, 3))
+    print('qtable saved')
 
 
 def read_qtable(file_path='qtable.csv') -> np.ndarray | None:
@@ -63,8 +71,9 @@ def act(qtable, dims, cur_pos: tuple[int, int]) -> int:
     row = cur_pos[0]
     col = cur_pos[1]
 
-    actions_for_cur_state = qtable[:, row * dims[0] + col]
-    print(actions_for_cur_state)
+    assert row >= 0 and row < dims[0] and col >= 0 and col < dims[1]
+
+    actions_for_cur_state = qtable[:, row * dims[1] + col]
 
     if random.random() > eps:
         if isinstance(actions_for_cur_state, list):
@@ -72,8 +81,11 @@ def act(qtable, dims, cur_pos: tuple[int, int]) -> int:
         else:
             action_ind = actions_for_cur_state.tolist().index(max(actions_for_cur_state))
     else:
-        action_ind = random.randint(0, len(actions_for_cur_state) - 1)
+        action_ind = random.randrange(len(actions_for_cur_state))
+
     print(action_space[int(action_ind)], action_ind)
+
+    # perform the actual movement
     utils.press_key(action_space[int(action_ind)])
     return int(action_ind)
 
@@ -88,40 +100,68 @@ def update_qtable(qtable, action: int, state: int, reward: int, new_state: int):
     """
     global learning_rate, discount_rate
 
+    print(f'action: {action}, state: {state}, reward: {reward}, new_state: {new_state}')
+
     # Bellman equation:
-    qtable[state][action] = qtable[state][action] + learning_rate * (reward + discount_rate * np.max(qtable[new_state]))
+    qtable[action, state] = qtable[action, state] + learning_rate * (reward + discount_rate * np.max(qtable[:, new_state]))
     return qtable
 
 
-def qlearning_loop(qtable: np.ndarray, bg_matrix, dims=DEFAULT_DIMS):
+def qlearning_loop(
+        qtable: np.ndarray,
+        bg_matrix: np.ndarray,
+        starting_pos: tuple[int, int],
+        dims=DEFAULT_DIMS
+        ) -> None:
+    """
+    Main logic of the qlearning.
+    :param starting_pos: charater pos captured before starting the loop
+    :param dims: bg matrix dims
+    """
+    from utils import bounding_box_default as bb
 
-    global eps, cur_pos, new_pos, route, eps_decay_rate
+    global eps, eps_decay_rate, num_episodes, max_steps_per_episode
+
+    h_block = bb['height'] // dims[0]
+    w_block = bb['width'] // dims[1]
+    print(w_block, h_block)
+
+    cur_pos = (starting_pos[0] // h_block, starting_pos[1] // w_block)
 
     for episode in range(num_episodes):
         print(f'ep {episode}')
 
-        route = []  # allows to track actions taken in the current run
+        # route = []  # allows to track actions taken in the current run
         # prev_coord_delta = [0] * 5  # remember 5 prev coordinate changes
         for step in range(max_steps_per_episode):
 
-            # make char pos relative to bg matrix
-            cur_pos = cur_pos[0]//dims[0], cur_pos[1]//dims[1]
+            # print(f'cur_pos: {cur_pos}')
 
-            action_ind = act(qtable, cur_pos)  # take new action
-            route.append([cur_pos, action_ind])
-            new_pos = utils.get_char_pos(bg_matrix)
+            # make char pos relative to bg matrix
+            # cur_pos = cur_pos // 52
+            # cur_pos = (cur_pos[0] // h_block, cur_pos[1] // w_block)
+            # print(f'cur_pos = {cur_pos}')
+            # print(f'state = {cur_pos[0] * dims[1] + cur_pos[1]}')
+
+            action_ind = act(qtable, dims, cur_pos)  # take new action
+
+            # get the updated state of the environment
+            bg_pixels = utils.get_screen_capture()
+            new_pos = utils.get_char_pos(bg_pixels)
+            # route.append([cur_pos, action_ind])
 
             # if char not found => update qtable manually, reset env
             if new_pos == (-1, -1):
                 print('char not found')
-                qtable[:, (cur_pos[0] * dims[0] + cur_pos[1])] -= 1
+                qtable[:, (cur_pos[0] * dims[1] + cur_pos[1])] -= 1
                 save_qtable(qtable)
                 break
 
             # make char pos relative to bg matrix
-            new_pos = (new_pos[0]//dims[0], new_pos[1]//dims[1])
+            new_pos = (new_pos[0] // h_block, new_pos[1] // w_block)
+            # print(f'new_state = {new_pos[0] * dims[1] + new_pos[1]}')
+            print(f'new_pos = {new_pos}')
 
-            print(new_pos)
             # TODO rewrite is_done check
             # if image_matrix[new_pos[0]][new_pos[1]] == 2:  # check if done
             #     save_qtable(qtable)
@@ -129,18 +169,17 @@ def qlearning_loop(qtable: np.ndarray, bg_matrix, dims=DEFAULT_DIMS):
             qtable = update_qtable(
                     qtable=qtable,
                     action=action_ind,
-                    state=cur_pos,
-                    new_state=new_pos,
+                    state=cur_pos[0] * dims[1] + cur_pos[1],
+                    new_state=new_pos[0] * dims[1] + new_pos[1],
                     reward=bg_matrix[new_pos],
                     )
             # print(route)
             cur_pos = new_pos
+            # cur_pos = new_pos[0], new_pos[1]
 
-        # here goes the end of episode
+        # here goes the end of episode (only happends when steps limit is reached)
         if episode % 5 == 0:
-            # TODO save qtable in separate execution thread (import threading)
             save_qtable(qtable)
-            print('qtable saved')
         eps = 0.01 + 0.99 * np.exp(-eps_decay_rate * episode)
         print(f'eps = {eps}')
         utils.restart()

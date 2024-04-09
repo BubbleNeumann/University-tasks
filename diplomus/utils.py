@@ -45,7 +45,7 @@ def get_char_pos(bg: np.ndarray) -> Sequence[int]:
     w, h = template.shape[:2]  # crop extra dimensions if present
     res = cv.matchTemplate(bg, template, cv.TM_CCOEFF_NORMED)
     _minVal, _maxVal, _minLoc, _maxLoc = cv.minMaxLoc(res, None)
-    return _maxLoc
+    return _maxLoc if _maxVal > 0.8 else (-1, -1)
 
 
 def get_char_pos_with_debug(
@@ -62,6 +62,11 @@ def get_char_pos_with_debug(
 
     res = cv.matchTemplate(bg, template, cv.TM_CCOEFF_NORMED)
     _minVal, _maxVal, _minLoc, _maxLoc = cv.minMaxLoc(res, None)
+    print(f'minVal: {_minVal}, maxVal: {_maxVal}, minLoc: {_minLoc}, maxLoc: {_maxLoc}')
+
+    # if not certain enough, return char not found
+    if _maxVal < 0.8:
+        return (-1, -1), None
 
     top_left = _maxLoc
     bottom_right = (top_left[0] + w, top_left[1] + h)
@@ -77,12 +82,13 @@ def get_char_pos_with_debug(
     return top_left, char_img
 
 
-def press_key(key: str, duration=0.1):
+def press_key(key: str, duration=0.2):
     keyboard.press(key)
     time.sleep(duration)
     keyboard.release(key)
 
 
 def restart():
+    print('restart')
     press_key('r')
     press_key('c')

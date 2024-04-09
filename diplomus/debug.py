@@ -1,16 +1,23 @@
 import utils
-import qlearning
+import qlearning as ql
 import numpy as np
+import time
 
 
 if __name__ == '__main__':
+    bg_matrix = ql.compose_bg_matrix()
+    bg_pixels = utils.get_screen_capture()
+    starting_pos = utils.get_char_pos(bg_pixels)
+    qtable = ql.compose_qtable_from_bg_matrix(bg_matrix)
+    time.sleep(2)
+    utils.press_key('space', 1)
+    time.sleep(1)
 
-    bg_matrix = np.zeros((10, 18))
-    bg_matrix[:, 0] = 1
-    bg_matrix[:, 1] = 2
-    bg_matrix[:, -1] = 3
-    qtable = qlearning.compose_qtable_from_bg_matrix(bg_matrix.copy())
+    print('start')
+    ql.qlearning_loop(qtable, bg_matrix, starting_pos)
 
-    print(qtable)
-    bg_matrix_new = qlearning.displ_qtable_as_bg_matrix(qtable)
-    print(bg_matrix_new)
+    # qtable = ql.read_qtable()
+    # bg = ql.displ_qtable_as_bg_matrix(qtable)
+    # bg = ql.compose_bg_matrix()
+    # np.set_printoptions(threshold=np.inf, linewidth=np.inf)
+    # print(bg)
