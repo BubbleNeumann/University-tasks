@@ -1,3 +1,5 @@
+from datetime import date, datetime
+
 import numpy as np
 import random
 import utils
@@ -19,7 +21,6 @@ DEFAULT_DIMS = (10, 18)  # (rows, cols)
 
 
 def compose_bg_matrix(dims=DEFAULT_DIMS) -> np.ndarray:
-    # return np.zeros(shape=dims)
     bg = np.zeros(shape=dims)
 
     # reward gradient leading to the exit
@@ -107,6 +108,11 @@ def update_qtable(qtable, action: int, state: int, reward: int, new_state: int):
     return qtable
 
 
+def is_done(cur_pos: tuple[int, int]) -> bool:
+    terminate_pos = [(0, 15), (0, 16), (0, 17)]
+    return cur_pos in terminate_pos
+
+
 def qlearning_loop(
         qtable: np.ndarray,
         bg_matrix: np.ndarray,
@@ -115,6 +121,7 @@ def qlearning_loop(
         ) -> None:
     """
     Main logic of the qlearning.
+    TODO: extract logging logic?
     :param starting_pos: charater pos captured before starting the loop
     :param dims: bg matrix dims
     """
@@ -131,41 +138,36 @@ def qlearning_loop(
     for episode in range(num_episodes):
         print(f'ep {episode}')
 
-        # route = []  # allows to track actions taken in the current run
-        # prev_coord_delta = [0] * 5  # remember 5 prev coordinate changes
+        route = []  # allows to track actions taken in the current run
         for step in range(max_steps_per_episode):
-
-            # print(f'cur_pos: {cur_pos}')
-
-            # make char pos relative to bg matrix
-            # cur_pos = cur_pos // 52
-            # cur_pos = (cur_pos[0] // h_block, cur_pos[1] // w_block)
-            # print(f'cur_pos = {cur_pos}')
-            # print(f'state = {cur_pos[0] * dims[1] + cur_pos[1]}')
 
             action_ind = act(qtable, dims, cur_pos)  # take new action
 
             # get the updated state of the environment
             bg_pixels = utils.get_screen_capture()
             new_pos = utils.get_char_pos(bg_pixels)
-            # route.append([cur_pos, action_ind])
+            route.append([cur_pos, action_ind])
+
+            if is_done(new_pos):
+                print('OMG!!')
+                save_qtable(qtable)
+                return
+
+            # if the last 5 actions are the same and there is no state change =>
+            # reduce the reward for this action in this state
+            if len(route) > 5 and all(map(lambda x: x == route[0], route[-5:])):
+                qtable[:, (cur_pos[0] * dims[1] + cur_pos[1])] -= 1
+                print('no progress, reducing reward')
 
             # if char not found => update qtable manually, reset env
             if new_pos == (-1, -1):
-                print('char not found')
+                print('dead, reducing reward')
                 qtable[:, (cur_pos[0] * dims[1] + cur_pos[1])] -= 1
-                save_qtable(qtable)
                 break
 
             # make char pos relative to bg matrix
             new_pos = (new_pos[0] // h_block, new_pos[1] // w_block)
-            # print(f'new_state = {new_pos[0] * dims[1] + new_pos[1]}')
-            print(f'new_pos = {new_pos}')
 
-            # TODO rewrite is_done check
-            # if image_matrix[new_pos[0]][new_pos[1]] == 2:  # check if done
-            #     save_qtable(qtable)
-            #     return
             qtable = update_qtable(
                     qtable=qtable,
                     action=action_ind,
@@ -175,16 +177,18 @@ def qlearning_loop(
                     )
             # print(route)
             cur_pos = new_pos
-            # cur_pos = new_pos[0], new_pos[1]
 
         # here goes the end of episode (only happends when steps limit is reached)
         if episode % 5 == 0:
             save_qtable(qtable)
+
         eps = 0.01 + 0.99 * np.exp(-eps_decay_rate * episode)
         print(f'eps = {eps}')
         utils.restart()
+
         # save route
-        # with open(f'route{episode}.csv', 'a') as f:
-        #     csv.writer(f).writerows(route)
+        time_n = datetime.now().strftime('%H:%M:%S')
+        with open(f'routes/{date.today()}{time_n}_ep{episode}.csv', 'a') as f:
+            csv.writer(f).writerows(route)
 
         time.sleep(3)
