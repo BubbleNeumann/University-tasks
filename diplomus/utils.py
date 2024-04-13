@@ -1,12 +1,14 @@
 from typing import Sequence
 from numpy import ndarray
 
+import matplotlib.pyplot as plt
+import matplotlib.ticker as plticker
 import mss.tools
 import numpy as np
 import cv2 as cv
-import matplotlib.pyplot as plt
 import keyboard
 import time
+import os
 
 bounding_box_default = {'top': 70, 'left': 0, 'width': 940, 'height': 520}
 
@@ -82,7 +84,7 @@ def get_char_pos_with_debug(
     return top_left, char_img
 
 
-def press_key(key: str, duration=0.2):
+def press_key(key, duration=0.1):
     keyboard.press(key)
     time.sleep(duration)
     keyboard.release(key)
@@ -92,3 +94,30 @@ def restart():
     print('restart')
     press_key('r')
     press_key('c')
+
+
+def visualize_progress():
+
+    routes = []
+    for file in os.listdir('routes'):
+        with open(f'routes/{file}', 'r') as f:
+            x = []
+            y = []
+            for line in f.readlines():
+                col, row, action = line.split(',')
+                y.append(int(row.replace('"', '').replace(')', '')) * 52)
+                x.append(int(col.replace('"', '').replace('(', '')) * 52)
+            routes.append((x, y))
+
+    img = plt.imread('image.png')
+    fig, ax = plt.subplots()
+    loc = plticker.MultipleLocator(base=52)
+    ax.xaxis.set_major_locator(loc)
+    ax.yaxis.set_major_locator(loc)
+
+    ax.grid(which='major', axis='both')
+    # fig, ax = plt.subplots()
+    ax.imshow(img)
+    for n in routes:
+        ax.scatter(*n, color='yellow')
+    plt.show()

@@ -10,14 +10,16 @@ import csv
 action_space = ['a', 'd', 'space', 'a+x', 'd+x', 'z+w']
 
 # qlearning globals
-eps = 1  # exploration rate
-eps_decay_rate = 0.01  # delta between episodes
-num_episodes = 100
+eps = 0.6  # exploration rate
+eps_decay_rate = 0.0001  # delta between episodes
+num_episodes = 10000
 max_steps_per_episode = 50  # owtherwise it becomes pointless
 learning_rate = 0.1  # alpha
 discount_rate = 0.99  # gamma
 
 DEFAULT_DIMS = (10, 18)  # (rows, cols)
+exit_row = 9
+exit_col = 17
 
 
 def compose_bg_matrix(dims=DEFAULT_DIMS) -> np.ndarray:
@@ -105,7 +107,8 @@ def update_qtable(qtable, action: int, state: int, reward: int, new_state: int):
 
     # Bellman equation:
     qtable[action, state] = qtable[action, state] + learning_rate * (reward + discount_rate * np.max(qtable[:, new_state]))
-    return qtable
+
+    return qtable / (np.ones(qtable.shape) * np.max(qtable))
 
 
 def is_done(cur_pos: tuple[int, int]) -> bool:
@@ -175,14 +178,22 @@ def qlearning_loop(
                     new_state=new_pos[0] * dims[1] + new_pos[1],
                     reward=bg_matrix[new_pos],
                     )
-            # print(route)
+
+            action_taken = action_ind
+
+            # give the penalty for going in the wrong direction
+            if abs(exit_row - cur_pos[0]) < abs(exit_row - new_pos[0]) \
+                    or abs(exit_col - cur_pos[1]) < abs(exit_col - new_pos[1]):
+                qtable[action_taken, cur_pos] -= 1
+
             cur_pos = new_pos
 
         # here goes the end of episode (only happends when steps limit is reached)
         if episode % 5 == 0:
             save_qtable(qtable)
 
-        eps = 0.01 + 0.99 * np.exp(-eps_decay_rate * episode)
+        # eps = 0.01 + 0.99 * np.exp(-eps_decay_rate * episode)
+        eps -= eps_decay_rate
         print(f'eps = {eps}')
         utils.restart()
 
