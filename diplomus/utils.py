@@ -10,7 +10,8 @@ import keyboard
 import time
 import os
 
-bounding_box_default = {'top': 70, 'left': 0, 'width': 940, 'height': 520}
+# bounding_box_default = {'top': 70, 'left': 0, 'width': 940, 'height': 520}
+bounding_box_default = {'top': 130, 'left': 0, 'width': 940, 'height': 520}
 
 
 def get_screen_capture(

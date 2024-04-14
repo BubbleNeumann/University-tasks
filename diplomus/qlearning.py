@@ -7,18 +7,19 @@ import time
 import csv
 
 
-action_space = ['a', 'd', 'space', 'a+x', 'd+x', 'z+w']
+# action_space = ['a', 'd', 'space', 'a+x', 'd+x', 'z+w']
+action_space = ['d', 'space', 'd+x', 'z+w']
 
 # qlearning globals
 eps = 0.6  # exploration rate
-eps_decay_rate = 0.0001  # delta between episodes
+eps_decay_rate = 0.01  # delta between episodes
 num_episodes = 10000
 max_steps_per_episode = 50  # owtherwise it becomes pointless
 learning_rate = 0.1  # alpha
 discount_rate = 0.99  # gamma
 
 DEFAULT_DIMS = (10, 18)  # (rows, cols)
-exit_row = 9
+exit_row = 0
 exit_col = 17
 
 
@@ -108,12 +109,20 @@ def update_qtable(qtable, action: int, state: int, reward: int, new_state: int):
     # Bellman equation:
     qtable[action, state] = qtable[action, state] + learning_rate * (reward + discount_rate * np.max(qtable[:, new_state]))
 
+    # normalize to avoid int overflow into 'inf'
     return qtable / (np.ones(qtable.shape) * np.max(qtable))
 
 
 def is_done(cur_pos: tuple[int, int]) -> bool:
     terminate_pos = [(0, 15), (0, 16), (0, 17)]
     return cur_pos in terminate_pos
+
+
+def calc_reward(is_dead: bool, cur_pos: tuple[int, int], new_pos: tuple[int, int]) -> int:
+    # wheather or not the character is getting closer to the exit
+    progress = abs(exit_col - cur_pos[0]) > abs(exit_col - new_pos[0]) \
+            or abs(exit_row - cur_pos[1]) > abs(exit_row - new_pos[1])
+    return 1 if not is_dead and progress else -1
 
 
 def qlearning_loop(
@@ -144,7 +153,9 @@ def qlearning_loop(
         route = []  # allows to track actions taken in the current run
         for step in range(max_steps_per_episode):
 
+            print(cur_pos)
             action_ind = act(qtable, dims, cur_pos)  # take new action
+
 
             # get the updated state of the environment
             bg_pixels = utils.get_screen_capture()
@@ -156,44 +167,33 @@ def qlearning_loop(
                 save_qtable(qtable)
                 return
 
-            # if the last 5 actions are the same and there is no state change =>
-            # reduce the reward for this action in this state
-            if len(route) > 5 and all(map(lambda x: x == route[0], route[-5:])):
-                qtable[:, (cur_pos[0] * dims[1] + cur_pos[1])] -= 1
-                print('no progress, reducing reward')
-
-            # if char not found => update qtable manually, reset env
-            if new_pos == (-1, -1):
-                print('dead, reducing reward')
-                qtable[:, (cur_pos[0] * dims[1] + cur_pos[1])] -= 1
-                break
-
             # make char pos relative to bg matrix
             new_pos = (new_pos[0] // h_block, new_pos[1] // w_block)
+
+            is_dead = new_pos == (-1, -1)
 
             qtable = update_qtable(
                     qtable=qtable,
                     action=action_ind,
                     state=cur_pos[0] * dims[1] + cur_pos[1],
                     new_state=new_pos[0] * dims[1] + new_pos[1],
-                    reward=bg_matrix[new_pos],
+                    # reward=bg_matrix[new_pos],
+                    reward=calc_reward(is_dead, cur_pos, new_pos),
                     )
 
-            action_taken = action_ind
-
-            # give the penalty for going in the wrong direction
-            if abs(exit_row - cur_pos[0]) < abs(exit_row - new_pos[0]) \
-                    or abs(exit_col - cur_pos[1]) < abs(exit_col - new_pos[1]):
-                qtable[action_taken, cur_pos] -= 1
+            if is_dead:
+                print('dead')
+                break
 
             cur_pos = new_pos
 
-        # here goes the end of episode (only happends when steps limit is reached)
+        # here goes the end of episode:
+        # only happends when steps limit is reached or character is dead
         if episode % 5 == 0:
             save_qtable(qtable)
 
-        # eps = 0.01 + 0.99 * np.exp(-eps_decay_rate * episode)
-        eps -= eps_decay_rate
+        eps = 0.01 + 0.99 * np.exp(-eps_decay_rate * episode)
+
         print(f'eps = {eps}')
         utils.restart()
 
@@ -202,4 +202,4 @@ def qlearning_loop(
         with open(f'routes/{date.today()}{time_n}_ep{episode}.csv', 'a') as f:
             csv.writer(f).writerows(route)
 
-        time.sleep(3)
+        time.sleep(2)

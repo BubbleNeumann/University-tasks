@@ -5,4 +5,7 @@ import time
 
 
 if __name__ == '__main__':
-    utils.visualize_progress()
+    # utils.visualize_progress()
+    # bg = utils.get_screen_capture()
+    # utils.get_char_pos_with_debug(bg, show_pic=True)
+    utils.get_screen_capture_with_debug()
