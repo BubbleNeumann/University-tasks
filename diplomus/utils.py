@@ -10,8 +10,8 @@ import keyboard
 import time
 import os
 
-# bounding_box_default = {'top': 70, 'left': 0, 'width': 940, 'height': 520}
-bounding_box_default = {'top': 130, 'left': 0, 'width': 940, 'height': 520}
+bounding_box_default = {'top': 70, 'left': 0, 'width': 940, 'height': 520}
+# bounding_box_default = {'top': 130, 'left': 0, 'width': 940, 'height': 520}
 
 
 def get_screen_capture(
@@ -86,6 +86,8 @@ def get_char_pos_with_debug(
 
 
 def press_key(key, duration=0.1):
+    if key == 'z+w':
+        duration = 1.5
     keyboard.press(key)
     time.sleep(duration)
     keyboard.release(key)
