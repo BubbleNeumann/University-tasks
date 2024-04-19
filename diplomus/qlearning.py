@@ -76,6 +76,21 @@ def act(qtable, dims, cur_pos: tuple[int, int]) -> int:
     return int(action_ind)
 
 
+def normalize_qtable(qtable):
+    """
+    Normalizes each column independently, keeps the proportions for each state.
+    """
+    # Find the maximum element for each column
+    max_values = np.max(qtable, axis=0)
+
+    # Avoid division by zero by replacing zero max values with 1
+    max_values[max_values == 0] = 1
+
+    # Normalize each column independently
+    normalized_matrix = qtable / max_values
+    return normalized_matrix
+
+
 def update_qtable(qtable, action: int, state: int, reward: int, new_state: int):
     """
     :param new_state: updated character state
@@ -97,7 +112,7 @@ def update_qtable(qtable, action: int, state: int, reward: int, new_state: int):
 
 
 def is_done(cur_pos: tuple[int, int]) -> bool:
-    terminate_pos = [(0, 15), (0, 16), (0, 17)]
+    terminate_pos = [(16, 0), (17, 0)]
     return cur_pos in terminate_pos
 
 
@@ -146,11 +161,15 @@ def qlearning_loop(
             print(f'new_pos before cast: {new_pos}')
             # make char pos relative to bg matrix
             new_pos = (new_pos[0] // h_block, new_pos[1] // w_block)
-            print(f'new_pos after cast: {new_pos}')
 
             if is_done(new_pos):
                 print('OMG!!')
                 save_qtable(qtable)
+
+                # save route
+                time_n = datetime.now().strftime('%H:%M:%S')
+                with open(f'routes/{date.today()}{time_n}_ep{episode}.csv', 'a') as f:
+                    csv.writer(f).writerows(route)
                 return
 
             is_dead = new_pos == (-1, -1)

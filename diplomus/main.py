@@ -5,8 +5,8 @@ import time
 
 
 def main():
-    # qtable = ql.read_qtable()
-    qtable = ql.init_qtable()
+    qtable = ql.read_qtable()
+    # qtable = ql.init_qtable()
     # if qtable is None:
     #     qtable = ql.init_qtable()
 

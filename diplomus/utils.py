@@ -99,11 +99,21 @@ def restart():
     press_key('c')
 
 
-def visualize_progress():
-
+def visualize_progress(route_file=''):
     routes = []
-    for file in os.listdir('routes'):
-        with open(f'routes/{file}', 'r') as f:
+
+    if route_file == '':
+        for file in os.listdir('routes'):
+            with open(f'routes/{file}', 'r') as f:
+                x = []
+                y = []
+                for line in f.readlines():
+                    col, row, action = line.split(',')
+                    y.append(int(row.replace('"', '').replace(')', '')) * 52)
+                    x.append(int(col.replace('"', '').replace('(', '')) * 52)
+                routes.append((x, y))
+    else:
+        with open(f'routes/{route_file}', 'r') as f:
             x = []
             y = []
             for line in f.readlines():
@@ -119,7 +129,6 @@ def visualize_progress():
     ax.yaxis.set_major_locator(loc)
 
     ax.grid(which='major', axis='both')
-    # fig, ax = plt.subplots()
     ax.imshow(img)
     for n in routes:
         ax.scatter(*n, color='yellow')
