@@ -10,8 +10,36 @@ import keyboard
 import time
 import os
 
-bounding_box_default = {'top': 70, 'left': 0, 'width': 940, 'height': 520}
-# bounding_box_default = {'top': 130, 'left': 0, 'width': 940, 'height': 520}
+bounding_box_default = {'top': 70, 'left': 0, 'width': 950, 'height': 530}  # msi display
+# bounding_box_default = {'top': 130, 'left': 0, 'width': 940, 'height': 520}  # laptop / dell display
+
+
+def logging(coords, chosen_action, qtable):
+    """
+    Helps to mannuly track the decisions making progress.
+    Only makes sense to call this function if the taken action is not random.
+    :param random: whether or not the random action was taken (depends on eps)
+    """
+
+    from qlearning import DEFAULT_DIMS
+
+    log_str = ''
+    action_space = ['space', 'd+x', 'z+w', 'd', 'a', 'a+x']
+    match coords:
+        case (0, 7):
+            log_str += 'A'
+        case (4, 6):
+            log_str += 'B'
+        case (8, 3):
+            log_str += 'C'
+    row = coords[1]
+    col = coords[0]
+    dims = DEFAULT_DIMS
+    actions_for_cur_state = qtable[:, row * dims[1] + col]
+    # print(actions_for_cur_state, action_space[chosen_action])
+    log_str += f'{coords} {action_space[chosen_action]} {actions_for_cur_state}'
+    with open('log.txt', 'a') as f:
+        f.write(log_str + '\n')
 
 
 def get_screen_capture(
@@ -85,9 +113,9 @@ def get_char_pos_with_debug(
     return top_left, char_img
 
 
-def press_key(key, duration=0.1):
+def press_key(key, duration=0.2):
     if key == 'z+w':
-        duration = 1.5
+        duration = 0.9
     keyboard.press(key)
     time.sleep(duration)
     keyboard.release(key)
@@ -97,6 +125,12 @@ def restart():
     print('restart')
     press_key('r')
     press_key('c')
+
+
+def demo(route: list):
+    action_space = ['space', 'd+x', 'z+w', 'd', 'a', 'a+x']
+    for pos, act in route:
+        press_key(action_space[act])
 
 
 def visualize_progress(route_file=''):
@@ -124,12 +158,14 @@ def visualize_progress(route_file=''):
 
     img = plt.imread('image.png')
     fig, ax = plt.subplots()
-    loc = plticker.MultipleLocator(base=52)
-    ax.xaxis.set_major_locator(loc)
-    ax.yaxis.set_major_locator(loc)
+    ax.xaxis.set_major_locator(plticker.MultipleLocator(base=52))
+    ax.yaxis.set_major_locator(plticker.MultipleLocator(base=52))
 
     ax.grid(which='major', axis='both')
     ax.imshow(img)
     for n in routes:
-        ax.scatter(*n, color='yellow')
+        ax.scatter(*n, color='y', )
+        ax.set_xticklabels(range(-1, 18))
+        ax.set_yticklabels(range(-1, 18))
     plt.show()
+
